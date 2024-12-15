@@ -1,7 +1,9 @@
-from dialogs.AuditTrailDialog import AuditTrailDialog  # Dialog for viewing audit trails
+from dialogs.TableDialog import TableDialog  # Dialog for viewing audit trails
 from dialogs.UserAccessDialog import UserAccessDialog  # Dialog for user management
-from dialogs.file_dialog import FileManagementDialog  # File Management Dialog
 from dialogs.PasswordDialog import PasswordDialog
+from services.SecurityService import SecurityService
+from dialogs.FileManagementDialog import FileManagementDialog
+
 from models.study_model import StudyModel  # For managing study-specific data
 from models.user_model import UserModel  # For managing user credentials
 from utils.dialog_helper import DialogHelper  # Utility for displaying dialogs
@@ -15,60 +17,52 @@ import importlib.util
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, user_model):
+    def __init__(self, user_model, parent=None):
         super().__init__()
         self.setWindowTitle("Mapel")
         self.setGeometry(300, 100, 300, 100)
 
-        self.unsaved_changes = False
-        self.file_path = None
         self.open_windows = []  # List to track all open windows
-
         self.user_model = user_model
-        self.study_model = self.create_file()
-        self.selected_option = None
+        self.study_model = StudyModel(self.user_model)
+        self.unsaved_changes = False
 
-        # State variables
-        self.export = {
-            'audit_trail': {},
-            'signatures': {},
-            'data': {},
-            'results': {},
-            'metadata': {
-                'program_version': 1.0,
-                'date_created': datetime.now(),
-                'user': self.study_model.username,
-                'public_key': self.study_model.get_user_credentials()['public_key']
-            }
-        }
 
         # Create central widget and main layout
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.main_layout = QVBoxLayout(self.central_widget)
+        # Connect the signal from StudyModel
+        self.study_model.files_imported.connect(self.open_file_management)
+        self.file_management_dialog = None  # Add instance variable to track dialog state
 
         # Setup menu bar and toolbar
         self.create_menu_bar()
         self.create_toolbar()
+        
         # Add QLabel for module status
         self.module_status_label = QLabel("No module loaded", self)
         self.module_status_label.setStyleSheet(
             "color: red; font-weight: bold; font-size: 14px; background-color: black;"
         )
-        self.main_layout.addWidget(self.module_status_label)
         
+        self.main_layout.addWidget(self.module_status_label)
+        self.study_model.create_new_file()
+
     def create_menu_bar(self):
         """Create the menu bar."""
         menu_bar = self.menuBar()
 
         # File menu
         file_menu = menu_bar.addMenu("File")
-        file_menu.addAction(self.create_action("New File", self.create_file))
-        file_menu.addAction(self.create_action("Open File", self.open_file))
-        file_menu.addAction(self.create_action("Save File", self.save_file))
-        file_menu.addAction(self.create_action("Save As", self.save_as))
+        file_menu.addAction(self.create_action("New File", self.study_model.create_new_file))
+        file_menu.addAction(self.create_action("Open File", self.study_model.open_file))
+        file_menu.addAction(self.create_action("Save File", self.study_model.save_file))
+        file_menu.addAction(self.create_action("Save As", self.study_model.save_as))
         file_menu.addSeparator()
-        file_menu.addAction(self.create_action("Import", lambda: self.select_files("Images")))
+
+
+        file_menu.addAction(self.create_action("Import", self.study_model.import_files))
         file_menu.addSeparator()
         file_menu.addAction(self.create_action("Exit", self.close))
 
@@ -81,7 +75,7 @@ class MainWindow(QMainWindow):
         self.run_action = self.create_action("Run", self.run_selected_option)
         self.run_action.setDisabled(True)  # Initially disabled
         analysis_menu.addAction(self.run_action)
-        analysis_menu.addAction(self.create_action("Sign Results", self.sign_results))
+        analysis_menu.addAction(self.create_action("Sign Results", self.study_model.sign_results))
 
         # Utilities menu
         utilities_menu = menu_bar.addMenu("Utilities")
@@ -91,7 +85,7 @@ class MainWindow(QMainWindow):
 
         # System menu
         system_menu = menu_bar.addMenu("System")
-        system_menu.addAction(self.create_action("System Audit Trail", self.view_system_audit_trail))
+        system_menu.addAction(self.create_action("System Audit Trail", self.user_model.get_audit_trail))
         system_menu.addSeparator()
         system_menu.addAction(self.create_action("User Management", self.open_user_management))
         self.load_module_options()
@@ -103,9 +97,20 @@ class MainWindow(QMainWindow):
         self.addToolBar(Qt.TopToolBarArea, toolbar)  # Anchor toolbar to the top
 
         # Add actions to toolbar
-        toolbar.addAction(self.create_action("New", self.create_file, "icons/new_file.png"))
-        toolbar.addAction(self.create_action("Open", self.open_file, "icons/open_file.png"))
-        toolbar.addAction(self.create_action("Save", self.save_file, "icons/save_file.png"))
+        toolbar.addAction(self.create_action("New", self.study_model.create_new_file, "icons/new_file.png"))
+        toolbar.addAction(self.create_action("Open", self.study_model.open_file, "icons/open_file.png"))
+        toolbar.addAction(self.create_action("Save", self.study_model.save_file, "icons/save_file.png"))
+        toolbar.addSeparator()
+
+        # Add the Run button
+        self.run_button_action = QAction(QIcon("icons/run.png"), "Run", self)
+
+        
+        # Add Import Files action
+        import_action = QAction("Import Files", self)
+        import_action.setIcon(QIcon("icons/import_file.png"))  # Add an icon (optional)
+        import_action.triggered.connect(self.study_model.import_files)  # Connect to StudyModel's import_files method
+        toolbar.addAction(import_action)
         toolbar.addSeparator()
 
         # Add the Run button
@@ -114,9 +119,6 @@ class MainWindow(QMainWindow):
         self.run_button_action.setDisabled(True)  # Initially disabled
         toolbar.addAction(self.run_button_action)
 
-        toolbar.addSeparator()
-        toolbar.addAction(self.create_action("Import", lambda: self.select_files("Images"), "icons/import_file.png"))
-        toolbar.addSeparator()
         toolbar.addAction(self.create_action("Audit Trail", self.view_study_audit_trail, "icons/audit_logo.png"))
         toolbar.addAction(self.create_action("Sign Results", self.sign_results, "icons/signature_logo.png"))
         
@@ -131,84 +133,9 @@ class MainWindow(QMainWindow):
         action.triggered.connect(handler)
         return action
 
-    
-    def serialize_dict(self, data_dict: dict) -> dict:
-        """
-        Recursively serialize a dictionary, converting unsupported data types.
-
-        Args:
-            data_dict (dict): Dictionary to serialize.
-
-        Returns:
-            dict: Serialized dictionary with JSON-compatible data types.
-        """
-        serialized = {}
-        for key, value in data_dict.items():
-            if isinstance(value, dict):
-                # Recursively handle nested dictionaries
-                serialized[key] = self.serialize_dict(value)
-            elif isinstance(value, (list, tuple)):  # Handle list or tuple
-                serialized[key] = list(value)
-            else:
-                # Convert unsupported types to strings
-                serialized[key] = value
-        return serialized
-
-    
-    def sign_results(self):
-        """Sign the processed results using the user's private key."""
-        # Open password dialog
-        password_dialog = PasswordDialog(self)
-        if password_dialog.exec_() == QDialog.Accepted:
-            password = password_dialog.password
-    
-            try:
-                # Fetch user credentials
-                user_credentials = self.user_model.get_user_credentials()
-                if not user_credentials:
-                    QMessageBox.critical(self, "Error", "User credentials not found.")
-                    return
-    
-                encrypted_private_key = user_credentials["encrypted_private_key"]
-                salt = user_credentials["salt"]
-    
-                # Decrypt private key
-                private_key = self.security_service.decrypt_private_key(
-                    encrypted_private_key, password, salt
-                )
-                if not private_key:
-                    QMessageBox.critical(self, "Error", "Failed to decrypt the private key. Invalid password?")
-                    return
-    
-                # Serialize and hash the processed results
-                if not hasattr(self, "processed_results") or not self.processed_results:
-                    QMessageBox.warning(self, "Warning", "No processed results available for signing.")
-                    return
-    
-                data_to_sign = serialize_dict(self.processed_results)
-                data_hash = hashlib.sha256(data_to_sign.encode()).digest()
-    
-                # Sign the hashed data
-                signature = private_key.sign(
-                    data_hash,
-                    padding.PSS(
-                        mgf=padding.MGF1(SHA256()),
-                        salt_length=padding.PSS.MAX_LENGTH
-                    ),
-                    SHA256()
-                )
-    
-                # Handle signed results
-                QMessageBox.information(self, "Success", "Data signed successfully!")
-                print(f"Signature: {signature.hex()}")  # For debugging or saving
-    
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Signing failed: {e}")
-                print(f"Error during signing: {e}")
-
-    
     def load_module_options(self):
         """Load available modules from the 'module' folder."""
+
         module_dir = os.path.join(os.getcwd(), "Modules")  # Adjust path as needed
         if not os.path.exists(module_dir):
             DialogHelper.show_error(self, "Error", f"Module folder not found: {module_dir}")
@@ -244,9 +171,7 @@ class MainWindow(QMainWindow):
         # Update the internal variable
         self.selected_option = selected_option
         self.module_status_label.setText(f"Selected Module: {self.selected_option}")
-        self.module_status_label.setStyleSheet(
-                "color: black; font-weight: bold; font-size: 14px; background-color: black;"
-            )
+        self.module_status_label.setStyleSheet("color: black; font-weight: bold; font-size: 14px; background-color: black;")
         self.run_action.setDisabled(False)  # Enable Run action
         self.run_button_action.setDisabled(False)  # Enable Run button
         print(f"Selected Module: {self.selected_option}")  # For debugging
@@ -257,165 +182,115 @@ class MainWindow(QMainWindow):
         if processor in self.open_windows:
             self.open_windows.remove(processor)
 
-    def run_selected_option(self):
-        """Run the selected module."""
-        if not self.selected_option:
-            DialogHelper.show_error(self, "Error", "No module selected.")
-            return
-    
+    def load_module(self, module_name):
+        """Load and run the selected module."""
         module_dir = os.path.join(os.getcwd(), "Modules")
-        module_path = os.path.join(module_dir, f"{self.selected_option}.py")
+        module_path = os.path.join(module_dir, f"{module_name}.py")
     
+        # Validate module file existence
         if not os.path.exists(module_path):
-            DialogHelper.show_error(self, "Error", f"Module file not found: {module_path}")
-            return
+            raise ImportError(f"Module file not found: {module_path}")
     
+        # Dynamically import the module
         try:
-            # Dynamically import the module
-            spec = importlib.util.spec_from_file_location(self.selected_option, module_path)
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-    
-            # Check for a class with the same name as the module
-            if hasattr(module, self.selected_option):
-                processor_class = getattr(module, self.selected_option)  # Get the class
-                processor = processor_class(self.selected_files)  # Instantiate the class
-                processor.show()
-                self.open_windows.append(processor)
-                # Handle results when the processor is closed
-                #def on_processor_closed():
-                if hasattr(processor, "processed_results") and processor.processed_results:
-                    self.processed_results = processor.processed_results    
-                # Connect destroyed signal and track open windows
-                self._remove_window(processor)
-            else:
-                DialogHelper.show_info(self, "Info", f"Module '{self.selected_option}' loaded but no valid entry point found.")
         except Exception as e:
-            DialogHelper.show_error(self, "Error", f"Failed to run module '{self.selected_option}': {e}")
+            raise ImportError(f"Failed to load module '{module_name}': {e}")
+    
+        # Validate the module contains the required class
+        if not hasattr(module, module_name):
+            raise ImportError(f"Class '{module_name}' not found in module '{module_name}'.")
+    
+        # Get the class and initialize it with the current file
+        processor_class = getattr(module, module_name)
+    
+        # Ensure file is selected from the file manager
+        if not hasattr(self, 'file_management_dialog') or not self.file_management_dialog:
+            QMessageBox.warning(self, "Error", "No file selected. Please open the File Manager and select a file.")
+            return
+    
+        # Retrieve the currently selected file
+        try:
+            selected_file = self.file_management_dialog.current_file()
+        except AttributeError:
+            QMessageBox.warning(self, "Error", "No file selected. Please ensure a file is chosen.")
+            return
+    
+        # Instantiate and show the processor
+        try:
+            processor = processor_class(selected_file)
+
+            self.open_windows.append(processor)
+            processor.show()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load processor: {e}")
 
 
 
-    def select_files(self, file_type):
-        """Open a file dialog to select multiple files based on the file type."""
-        file_filters = {
-            "Images": "Images (*.png *.jpg *.jpeg *.bmp *.gif)",
-            "Text": "Text Files (*.txt *.csv)",
-        }
 
-        file_filter = file_filters.get(file_type, "All Files (*.*)")
-        files, _ = QFileDialog.getOpenFileNames(self, f"Select {file_type} Files", "", file_filter)
-
-        if files:
-            self.selected_files = files
-            self.study_model.log_action( f"Selected {len(self.selected_files)} {self.selected_files} files")
-            self.export['data'] = {x :None for x in self.selected_files}
-            QMessageBox.information(self, "Files Selected", f"{len(self.selected_files)} files added.")
-
-            if file_type == "Images":
-                self.import_images(self.selected_files)
-
-    def import_images(self, images):
-        """Open the image viewer for the selected images."""
-        if images:
-            if hasattr(self, 'image_viewer') and self.image_viewer.isVisible():
-                QMessageBox.information(self, "Image Viewer", "Image Viewer is already open.")
-                return
-
-            self.image_viewer = ImageViewer(images)
-            self.image_viewer.show()
-
-            self.study_model.log_action( f"Opened Image Viewer with {len(images)} images")
-        else:
-            QMessageBox.warning(self, "No Images", "No image files selected.")
-
-    def open_file_management(self):
+    def open_file_management(self, file_list):
         """Open the File Management dialog."""
-        dialog = FileManagementDialog(self.selected_files, parent=self)
-        dialog.exec_()
-        self.study_model.log_action( "Opened File Management dialog")
+        if self.file_management_dialog and self.file_management_dialog.isVisible():
+            QMessageBox.information(self, "File Management", "File Management is already open.")
+            return
 
-    def create_file(self):
-        """Create a new file."""
-        try:
-            #file_path, _ = QFileDialog.getSaveFileName(self, "Create New File", "", "Shiva Files (*.shiva)")
-            if self.unsaved_changes:
-                reply = QMessageBox.question(self, "Unsaved Changes",
-                                             "You have unsaved changes. Do you want to save before exiting?",
-                                             QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-                if reply == QMessageBox.Yes:
-                    self.save_file()
-                    event.accept()
-                elif reply == QMessageBox.No:
-                    event.accept()
-                else:
-                    event.ignore()
-                    return
-                if self.study_model:
-                    self.study_model.conn.close()  # Safely close the existing connection
-                    
-            temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".shiva")
-            file_path = temp_file.name
-            temp_file.close()  # Close the file so it can be used elsewhere  
-            
-            study_model = StudyModel(file_path)
-            self.unsaved_changes = False
-            study_model.log_action( f"Created new file: {file_path}")
-            #DialogHelper.show_info(self, "Success", f"New file created at {self.file_path}")
-            return study_model
-        except Exception as e:
-            DialogHelper.show_error(self, "Error", f"Failed to create file: {e}")
-
-
-    def open_file(self):
-        """Open an existing file."""
-        try:
-            file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Shiva Files (*.shiva)")
-            if file_path:
-                self.file_path = file_path
-                self.study_model = StudyModel(self.file_path)
-                self.unsaved_changes = False
-                self.study_model.log_action( f"Opened file: {file_path}")
-                DialogHelper.show_info(self, "Success", f"File opened: {self.file_path}")
-        except Exception as e:
-            self.user_model.log_action( f"Failed to open file: {str(e)}")
-            DialogHelper.show_error(self, "Error", f"Failed to open file: {e}")
-
-
+        # Prepare file list
+        if not self.study_model.data:
+            QMessageBox.warning(self, "No Files", "No files are currently loaded in the study.")
+            return
         
+        self.file_list = file_list  # Update the file list
 
-    def save_file(self):
-        """Save the current file and modified images."""
-        if not self.file_path:
-            self.save_as()
+        # Create and show the dialog
+        self.file_management_dialog = FileManagementDialog(file_list, self)
+        self.file_management_dialog.destroyed.connect(self.clear_file_management_dialog)
+        self.open_windows.append(self.file_management_dialog)
+        self.file_management_dialog.show()  # Non-modal window
+        self.study_model.log_action("Opened File Management dialog")
 
-
-    def save_as(self):
-        """Save the current file as a new file."""
-        try:
-            file_path, _ = QFileDialog.getSaveFileName(self, "Save File As", "", "Shiva Files (*.shiva)")
-            if file_path:
-                self.file_path = file_path
-                if self.study_model:
-                    self.study_model.conn.close()
-                self.study_model = StudyModel(self.file_path)
-                self.save_file()
-        except Exception as e:
-            DialogHelper.show_error(self, "Error", f"Failed to save file as: {e}")
-
-    def view_system_audit_trail(self):
-        """Open the system audit trail dialog."""
-        audit_data = self.user_model.get_audit_trail()  # Fetch system audit data
-        dialog = AuditTrailDialog(audit_data, self)
-        dialog.exec_()
+    def clear_file_management_dialog(self):
+        """Clear the file management dialog reference when closed."""
+        self.file_management_dialog = None
     
+
+    def sign_results(self):
+        if self.study_model:
+            self.study_model.sign_results()
+
+
+
+    def check_study_loaded(action_name="perform this action"):
+        """Check if a study is loaded before proceeding."""
+        if not self.study_model:
+            QMessageBox.warning(self, "Error", f"No study file is loaded. Please create or open a study to {action_name}.")
+            return False
+        return True
+
+
+    def run_selected_option(self):
+        """Run the selected module."""
+        try:
+            self.load_module(self.selected_option)
+        except ImportError as e:
+            DialogHelper.show_error(self, "Error", str(e))
+        except Exception as e:
+            DialogHelper.show_error(self, "Error", f"Failed to run module: {e}")
+
     def view_study_audit_trail(self):
         """Open the study-specific audit trail dialog."""
         if not self.study_model:
             QMessageBox.warning(self, "Error", "No study file is open.")
             return
-        audit_data = self.study_model.get_audit_trail()  # Fetch study-specific audit data
-        dialog = AuditTrailDialog(audit_data, self)
+        audit_data = self.study_model.get_audit_trail()  # Get audit trail as list of dicts
+        column_headers = ["Username", "Action", "Date", "Time"]  # Match the structure of your audit data
+        
+        dialog = TableDialog(table_data=audit_data, column_headers=column_headers, title="Audit Trail", parent = self)
         dialog.exec_()
+
+
+
         
     def closeEvent(self, event):
         """Handle unsaved changes and close all open windows."""
@@ -424,7 +299,7 @@ class MainWindow(QMainWindow):
                                          "You have unsaved changes. Do you want to save before exiting?",
                                          QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
             if reply == QMessageBox.Yes:
-                self.save_file()
+                self.study_model.save_file()
                 event.accept()
             elif reply == QMessageBox.No:
                 event.accept()
@@ -446,8 +321,7 @@ class MainWindow(QMainWindow):
 
     def open_user_management(self):
         """Open the user management dialog."""
-        is_admin = [True if self.user_model.get_user_credentials()['admin'] == 1 else False]
-        dialog = UserAccessDialog(self.user_model, self.user_model.username, is_admin)
+        dialog = UserAccessDialog(self.user_model)
         dialog.exec_()
 
 

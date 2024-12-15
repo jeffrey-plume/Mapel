@@ -59,28 +59,6 @@ class SecurityService:
             raise ValueError("An error occurred during encryption.")
 
 
-    @staticmethod
-    def serialize_dict(data_dict: dict) -> dict:
-        """
-        Recursively serialize a dictionary, converting unsupported data types.
-
-        Args:
-            data_dict (dict): Dictionary to serialize.
-
-        Returns:
-            dict: Serialized dictionary with JSON-compatible data types.
-        """
-        serialized = {}
-        for key, value in data_dict.items():
-            if isinstance(value, dict):
-                # Recursively handle nested dictionaries
-                serialized[key] = SecurityService.serialize_dict(value)
-            elif isinstance(value, (list, tuple)):  # Handle list or tuple
-                serialized[key] = list(value)
-            else:
-                # Convert unsupported types to strings
-                serialized[key] = value
-        return serialized
 
     @staticmethod
     def sign_hash(hash_value: str, private_key: rsa.RSAPrivateKey) -> bytes:
@@ -112,8 +90,6 @@ class SecurityService:
         salt = encrypted_data[:16]  # Extract the salt
         iv = encrypted_data[16:32]  # Extract the IV
         ciphertext = encrypted_data[32:]  # Extract the ciphertext
-
-        print(f'Salt decrypt {salt}')
 
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -163,8 +139,6 @@ class SecurityService:
     def encrypt_with_password(data: bytes, password: str) -> bytes:
         """Encrypt data using a password-derived key."""
         salt = SecurityService.generate_salt()  # Generate a unique salt
-
-        print(f'Salt encrypt {salt}')
         
         kdf = PBKDF2HMAC(
             algorithm=hashes.SHA256(),
@@ -200,7 +174,7 @@ class SecurityService:
 
         
     @staticmethod  
-    def serialize_dict(self, data_dict: dict) -> dict:
+    def serialize_dict(data_dict: dict) -> dict:
         """
         Recursively serialize a dictionary, converting unsupported data types.
         
@@ -214,13 +188,67 @@ class SecurityService:
         for key, value in data_dict.items():
             if isinstance(value, dict):
                 # Recursively handle nested dictionaries
-                serialized[key] = self.serialize_dict(value)
+                serialized[key] = SecurityService.serialize_dict(value)
             elif isinstance(value, (list, tuple)):  # Handle list or tuple
                 serialized[key] = list(value)
             else:
                 # Convert unsupported types to strings
                 serialized[key] = value
         return serialized
+
+
+    @staticmethod
+    def validate_inputs(user: str, password: str, confirm_password= None):
+        """
+        Validate the username and password inputs.
+    
+        Args:
+            username (str): The username to validate.
+            password (str): The password to validate.
+            confirm_password (Optional[str]): Optional. Confirm password to validate against.
+    
+        Returns:
+            Tuple[bool, Optional[str]]: A tuple where the first value is True if inputs are valid,
+                                        and the second value is an error message if invalid.
+        """
+        # Check for empty fields
+        if not user or not password or (confirm_password is not None and not confirm_password):
+            return False, "All fields are required."
+    
+        # Validate username length and spaces
+        if len(user) < 3:
+            return False, "Username must be at least 3 characters long."
+        if " " in user:
+            return False, "Username cannot contain spaces."
+    
+        # Validate password length and spaces
+        if len(password) < 6:
+            return False, "Password must be at least 6 characters long."
+        if " " in password:
+            return False, "Password cannot contain spaces."
+    
+        # Check password confirmation if provided
+        if confirm_password is not None and password != confirm_password:
+            return False, "Passwords do not match."
+    
+        return True, None
+
+    @staticmethod
+    def validate_password(password):
+        """Validate the strength of the new password."""
+        if len(password) < 8:
+            return "Password must be at least 8 characters long."
+        if not any(char.isdigit() for char in password):
+            return "Password must contain at least one digit."
+        if not any(char.isupper() for char in password):
+            return "Password must contain at least one uppercase letter."
+        if not any(char.islower() for char in password):
+            return "Password must contain at least one lowercase letter."
+        if not any(char in "!@#$%^&*()-_=+[]{}|;:'\",.<>?/~`" for char in password):
+            return "Password must contain at least one special character."
+        return None
+
+
     
     @staticmethod
     def verify_signature(signature: bytes, hash_value: str, public_key: rsa.RSAPublicKey) -> bool:
