@@ -34,9 +34,12 @@ class MainWindow(QMainWindow):
         self.main_layout = QVBoxLayout(self.central_widget)
         # Connect the signal from StudyModel
         self.study_model.files_imported.connect(self.open_file_management)
+        
         self.file_management_dialog = None  # Add instance variable to track dialog state
+        self.processor = None
 
-        # Setup menu bar and toolbar
+        
+                # Setup menu bar and toolbar
         self.create_menu_bar()
         self.create_toolbar()
         
@@ -182,14 +185,17 @@ class MainWindow(QMainWindow):
         if processor in self.open_windows:
             self.open_windows.remove(processor)
 
-    def load_module(self, module_name):
+
+
+    def load_module(self, module_name, file_list):
         """Load and run the selected module."""
         module_dir = os.path.join(os.getcwd(), "Modules")
         module_path = os.path.join(module_dir, f"{module_name}.py")
-    
+        
         # Validate module file existence
         if not os.path.exists(module_path):
-            raise ImportError(f"Module file not found: {module_path}")
+            QMessageBox.critical(self, "Error", f"Module file not found: {module_path}")
+            return
     
         # Dynamically import the module
         try:
@@ -197,35 +203,46 @@ class MainWindow(QMainWindow):
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
         except Exception as e:
-            raise ImportError(f"Failed to load module '{module_name}': {e}")
+            QMessageBox.critical(self, "Error", f"Failed to load module '{module_name}': {e}")
+            return
     
         # Validate the module contains the required class
         if not hasattr(module, module_name):
-            raise ImportError(f"Class '{module_name}' not found in module '{module_name}'.")
+            QMessageBox.critical(self, "Error", f"Class '{module_name}' not found in module '{module_name}'.")
+            return
     
-        # Get the class and initialize it with the current file
+        # Get the class and initialize it
         processor_class = getattr(module, module_name)
     
-        # Ensure file is selected from the file manager
-        if not hasattr(self, 'file_management_dialog') or not self.file_management_dialog:
-            QMessageBox.warning(self, "Error", "No file selected. Please open the File Manager and select a file.")
+        # Validate file list
+        if not file_list:
+            QMessageBox.warning(self, "Error", "No files available for management.")
             return
     
-        # Retrieve the currently selected file
+        # Initialize the file management dialog
         try:
-            selected_file = self.file_management_dialog.current_file()
-        except AttributeError:
-            QMessageBox.warning(self, "Error", "No file selected. Please ensure a file is chosen.")
-            return
-    
-        # Instantiate and show the processor
-        try:
-            processor = processor_class(selected_file)
-
-            self.open_windows.append(processor)
-            processor.show()
+            self.file_management_dialog = FileManagementDialog(file_list)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to load processor: {e}")
+            QMessageBox.critical(self, "Error", f"Failed to create file management dialog: {e}")
+            return
+    
+        # Connect signals
+        try:
+            self.processor = processor_class(file_list)  # Initialize with the first file
+            self.file_management_dialog.file_list_updated.connect(self.processor.update_file_list)
+
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to initialize processor: {e}")
+            return
+    
+        # Show the processor and file management dialog
+        try:
+            self.open_windows.append(self.processor)
+            self.processor.show()
+            self.file_management_dialog.show()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to display windows: {e}")
+
 
 
 
@@ -272,7 +289,7 @@ class MainWindow(QMainWindow):
     def run_selected_option(self):
         """Run the selected module."""
         try:
-            self.load_module(self.selected_option)
+            self.load_module(self.selected_option, self.file_list)
         except ImportError as e:
             DialogHelper.show_error(self, "Error", str(e))
         except Exception as e:
