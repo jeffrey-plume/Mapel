@@ -4,9 +4,11 @@ from datetime import datetime
 import logging
 import tempfile
 from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtWidgets import QFileDialog, QMessageBox
-import os
-import logging
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialog
+from dialogs.PasswordDialog import PasswordDialog
+from services.SecurityService import SecurityService
+from dialogs.TableDialog import TableDialog
+
 
 logger = logging.getLogger(__name__)
 
@@ -165,7 +167,10 @@ class StudyModel(QObject):  # Inherit from QObject
         logger.info(f"Action logged: {action}")
 
     def sign_results(self):
-        """Sign the results stored in the study model."""
+        """
+        Sign the results stored in the study model.
+        Handles user input, generates a signature, and logs the action.
+        """
         password_dialog = PasswordDialog(self.user_model)
         if password_dialog.exec_() != QDialog.Accepted:
             logger.info("Signing canceled by user.")
@@ -177,6 +182,7 @@ class StudyModel(QObject):  # Inherit from QObject
             data_hash = SecurityService.hash_data(SecurityService.serialize_dict(self.data))
             signature = SecurityService.sign_hash(data_hash, encrypted_key)
     
+            # Append results to the signatures dictionary
             self.signatures["username"].append(self.username)
             self.signatures["data_hash"].append(data_hash)
             self.signatures["signature"].append(signature)
@@ -190,7 +196,41 @@ class StudyModel(QObject):  # Inherit from QObject
         except Exception as e:
             logger.error(f"Failed to sign results: {e}")
             raise
+    
+    
+    def prepare_signatures_data(self):
+        """
+        Prepare the signatures data for display in the TableDialog.
+    
+        Returns:
+            Tuple[List[Dict[str, Any]], List[str]]:
+                - A list of dictionaries, where each dict is a row for the table.
+                - A list of column headers for the table.
+        """
+        try:
+            # Prepare data rows for the table
+            table_data = [
+                {
+                    "Username": self.signatures["username"][i],
+                    "Data Hash": self.signatures["data_hash"][i],
+                    "Signature": self.signatures["signature"][i],
+                    "Date": self.signatures["date"][i],
+                    "Time": self.signatures["time"][i],
+                    "Comments": self.signatures["comments"][i],
+                }
+                for i in range(len(self.signatures["signature"]))
+            ]
+    
+            # Define the column headers
+            column_headers = ["Username", "Data Hash", "Signature", "Date", "Time", "Comments"]
+    
+            return table_data, column_headers
+        except Exception as e:
+            logger.error(f"Failed to prepare signatures data: {e}")
+            raise
 
+
+    
 
 
     def import_files(self, parent=None):
