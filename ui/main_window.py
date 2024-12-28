@@ -3,7 +3,6 @@ from dialogs.UserAccessDialog import UserAccessDialog  # Dialog for user managem
 from dialogs.PasswordDialog import PasswordDialog
 from services.SecurityService import SecurityService
 from dialogs.FileManagementDialog import FileManagementDialog
-from services.ModuleManager import ModuleManager
 from models.study_model import StudyModel  # For managing study-specific data
 from models.user_model import UserModel  # For managing user credentials
 from utils.dialog_helper import DialogHelper  # Utility for displaying dialogs
@@ -32,12 +31,14 @@ class MainWindow(QMainWindow):
         self.results = {}
 
 
-        self.Manager = ModuleManager()  # Initialize ModuleManager
         self.file_management_dialog = None
         self.selected_option = None
         self.options = {}
+        self.processor = {}
         self.loaded_modules = {}
+        self.file_list = []
         self.status_label = "No Module Selected"
+        self.current_index = 0
 
         # Create central widget and layout
         self.central_widget = QWidget()
@@ -163,6 +164,8 @@ class MainWindow(QMainWindow):
             # Keep a reference to the viewer window to prevent garbage collection
             self.open_windows.append(viewer)
             viewer.show()
+            self.results['Images'] = viewer.image_paths
+            
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to open the image viewer: {str(e)}")
 
@@ -255,8 +258,8 @@ class MainWindow(QMainWindow):
                 module_name = file_name[:-3]
                 
                 try:
-                    self.Manager.module_name = module_name
-                    self.loaded_modules[module_name] = self.Manager.load_module(module_name)
+                    self.options[module_name] = None
+                    self.loaded_modules[module_name] = self.load_module(module_name)
                     self.add_checkable_option(module_name)
                 except Exception as e:
                     QMessageBox.warning(self, "Module Load Error", f"Failed to load module '{module_name}': {e}")
@@ -268,6 +271,33 @@ class MainWindow(QMainWindow):
         action.triggered.connect(lambda checked, opt=option_name: self.update_selection(opt))
         self.module_menu.addAction(action)
         self.options[option_name] = action  # Store the action for reference
+
+
+    def load_module(self, module_name):
+        """
+        Dynamically load a module and return the class.
+    
+        Args:
+            module_name (str): The name of the module to load.
+    
+        Returns:
+            class: The loaded module class.
+        """
+        module_dir = os.path.join(os.getcwd(), "Modules")
+        module_path = os.path.join(module_dir, f"{module_name}.py")
+        print(module_path)
+        print(module_name)
+        if not os.path.exists(module_path):
+            raise ImportError(f"Module file not found: {module_path}")
+    
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        
+        if hasattr(module, module_name):
+            return getattr(module, module_name)  # Return the loaded class
+        else:
+            raise ImportError(f"Class '{module_name}' not found in module '{module_name}'")
 
 
     def update_selection(self, selected_option):
@@ -283,45 +313,49 @@ class MainWindow(QMainWindow):
         self.module_status_label.setStyleSheet(
             "color: white; font-weight: bold; font-size: 14px; background-color: black;"
         )
+
         
-        self.results[self.selected_option] = self.Manager.image_paths
+        self.results[selected_option] = {key:None for key in self.file_list}
         
         self.selected_option = selected_option
         self.run_action.setDisabled(False)  # Enable Run action
         self.run_button_action.setDisabled(False)  # Enable Run button
-        self.Manager.image_paths = self.results['Importer']
-        self.Manager.module_name = selected_option
-        self.Manager.processor_class = self.loaded_modules[selected_option]
+        self.open_module_window()
+       
 
-            
-        
-    def run_selected_option(self):
-        if not self.selected_option:
-            QMessageBox.warning(self, "No Module Selected", "Please select a module to run.")
-            return
-        
-        if not self.Manager or not self.Manager.image_paths:
-            QMessageBox.warning(self, "No Files", "No files available for processing.")
+    def open_module_window(self):
+        """Process the current image using the selected module and display the results."""
+        if not self.results[self.selected_option] or not self.loaded_modules[self.selected_option]:
+            QMessageBox.information(self, "No Images or Module", "No images or module to process.")
             return
 
-        Manager = self.Manager
+        if not (0 <= self.current_index < len(self.file_list)):
+            QMessageBox.warning(self, "Invalid Index", "Current index is out of range.")
+            return
 
-        
+        print(self.file_list)
+
         try:
-            # Dynamically create an instance of the selected module and run its compute method
-            result = Manager.compute()
+            # Instantiate the processor and process the image
+            processor_class = self.loaded_modules[self.selected_option]
+            self.processor = processor_class(image_paths=self.results[self.selected_option], index=self.current_index)
             
             if self.file_management_dialog:
-                self.file_management_dialog.current_index_changed.connect(result.set_current_index)
+                self.file_management_dialog.current_index_changed.connect(self.processor.set_current_index)
 
             # Keep a reference to the viewer window to prevent garbage collection
-            self.open_windows.append(result)
-            result.show()
-            # Display the result
-            QMessageBox.information(self, "Success", "Processing completed successfully.")
+            self.open_windows.append(self.processor)
+            self.processor.show()
+            
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"An error occurred during processing: {e}")
-
+            QMessageBox.critical(self, "Error", f"Processing failed for image '{current_filename}': {e}")
+            return
+        
+    def run_selected_option(self):
+        self.processor.compute()
+        self.results[self.selected_option] = self.processor.image_paths
+        self.processor.update_image()
+        
 
     def open_file_management(self, file_list=None):
         """
@@ -345,15 +379,22 @@ class MainWindow(QMainWindow):
         self.file_management_dialog = FileManagementDialog(self.results['Importer'])
     
         # Properly connect signal for current index change
-        self.file_management_dialog.current_index_changed.connect(self.Manager.update_current_index)
-        self.Manager.image_paths = self.results['Importer']
+        self.file_management_dialog.current_index_changed.connect(self.update_current_index)
 
         self.open_windows.append(self.file_management_dialog)
         self.file_management_dialog.show()
     
         print(f"FileManagementDialog opened with files: {self.results['Importer']}")
 
-    
+        
+        
+
+    def update_current_index(self, index):
+
+        if 0 <= index < len(self.file_list):
+            self.current_index = index
+        else:
+            QMessageBox.warning(None, "Invalid Index", "Index out of range.")
 
 
     def view_study_audit_trail(self):

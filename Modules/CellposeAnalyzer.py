@@ -29,8 +29,7 @@ class CellposeAnalyzer(ImageViewer):
         # Initialize the Cellpose model
         self.model = models.CellposeModel(model_type=model_type, gpu=gpu)
 
-        # Process and display the current image
-        self.compute()
+
 
     def compute(self):
         """Process the current image using Cellpose and display the segmentation result."""
