@@ -6,21 +6,15 @@ import csv
 import os
 from typing import Tuple
 
-
-class TableDialog(QDialog):
-    def __init__(self, table_data, column_headers, title="Table View", parent=None):
-        """
-        A general-purpose table dialog.
-
-        Args:
-            table_data (List[Dict[str, Any]]): List of dictionaries representing table rows.
-            column_headers (List[str]): List of column headers for the table.
-            title (str): Title of the dialog window.
-            parent (QWidget): Parent widget.
-        """
-        super().__init__(parent)
+class TableDialog(QDialog):  # Inherit from QDialog
+    def __init__(self, table_data, column_headers, title, parent=None):
+        super(TableDialog, self).__init__(parent)  # Properly initialize QDialog
         self.setWindowTitle(title)
         self.resize(800, 600)
+
+        if table_data is None or table_data.empty:
+            QMessageBox.warning(self, "No Data", "No data available to export.")
+            return
 
         # Main layout
         layout = QVBoxLayout(self)
@@ -30,7 +24,7 @@ class TableDialog(QDialog):
         layout.addWidget(self.table)
 
         # Configure table
-        if table_data:
+        if not table_data.empty:  # Check if DataFrame is not empty
             self.table.setRowCount(len(table_data))
             self.table.setColumnCount(len(column_headers))
             self.table.setHorizontalHeaderLabels(column_headers)
@@ -47,11 +41,11 @@ class TableDialog(QDialog):
         layout.addWidget(self.export_button)
 
         # Disable export button if no data
-        self.export_button.setEnabled(bool(table_data))
+        self.export_button.setEnabled(not table_data.empty)
 
     def populate_table(self, table_data, column_headers):
         """Fill the table with data."""
-        for row_idx, row_data in enumerate(table_data):
+        for row_idx, row_data in table_data.iterrows():  # Iterate over DataFrame rows
             for col_idx, header in enumerate(column_headers):
                 value = row_data.get(header, "")
                 if value == "":

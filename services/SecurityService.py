@@ -10,6 +10,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives.padding import PKCS7
 from cryptography.hazmat.backends import default_backend
 import json
+from typing import Tuple, Optional
 
 class SecurityService:
     """Service for encryption, decryption, and user credential management."""
@@ -25,6 +26,23 @@ class SecurityService:
         public_key = private_key.public_key()
         return private_key, public_key
 
+    @staticmethod
+    def save_private_key(private_key, path: str, password: str = None):
+        with open(path, "wb") as key_file:
+            key_file.write(private_key.private_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.PKCS8,
+                encryption_algorithm=serialization.BestAvailableEncryption(password.encode()) if password else serialization.NoEncryption()
+            ))
+    
+    @staticmethod
+    def load_private_key(path: str, password: str = None) -> rsa.RSAPrivateKey:
+        with open(path, "rb") as key_file:
+            return serialization.load_pem_private_key(
+                key_file.read(),
+                password=password.encode() if password else None,
+                backend=default_backend()
+            )
 
     @staticmethod
     def hash_password(password: str, salt: bytes) -> str:
@@ -133,32 +151,43 @@ class SecurityService:
             backend=default_backend()
         )
 
-    
+    @staticmethod
+    def validate_password(password: str) -> Tuple[bool, Optional[str]]:
+        if len(password) < 8:
+            return False, "Password must be at least 8 characters long."
+        if not any(char.isdigit() for char in password):
+            return False, "Password must contain at least one digit."
+        if not any(char.isupper() for char in password):
+            return False, "Password must contain at least one uppercase letter."
+        if not any(char.islower() for char in password):
+            return False, "Password must contain at least one lowercase letter."
+        if not any(char in "!@#$%^&*()-_=+[]{}|;:'\",.<>?/~`" for char in password):
+            return False, "Password must contain at least one special character."
+        return True, None
+
 
     @staticmethod
     def encrypt_with_password(data: bytes, password: str) -> bytes:
-        """Encrypt data using a password-derived key."""
-        salt = SecurityService.generate_salt()  # Generate a unique salt
-        
-        kdf = PBKDF2HMAC(
-            algorithm=hashes.SHA256(),
-            length=32,
-            salt=salt,
-            iterations=100000,
-            backend=default_backend()
-        )
-        key = kdf.derive(password.encode('utf-8'))
-        iv = secrets.token_bytes(16)  # Generate a unique IV
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-        encryptor = cipher.encryptor()
+        try:
+            salt = SecurityService.generate_salt()
+            kdf = PBKDF2HMAC(
+                algorithm=hashes.SHA256(),
+                length=32,
+                salt=salt,
+                iterations=100000,
+                backend=default_backend()
+            )
+            key = kdf.derive(password.encode('utf-8'))
+            iv = secrets.token_bytes(16)
+            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+            encryptor = cipher.encryptor()
     
-        # Apply PKCS7 padding
-        padder = PKCS7(algorithms.AES.block_size).padder()
-        padded_data = padder.update(data) + padder.finalize()
-    
-        # Encrypt and return salt + iv + ciphertext
-        ciphertext = encryptor.update(padded_data) + encryptor.finalize()
-        return salt + iv + ciphertext
+            padder = PKCS7(algorithms.AES.block_size).padder()
+            padded_data = padder.update(data) + padder.finalize()
+            ciphertext = encryptor.update(padded_data) + encryptor.finalize()
+            return salt + iv + ciphertext
+        except Exception as e:
+            raise ValueError(f"Encryption failed: {str(e)}")
 
 
     @staticmethod
@@ -248,7 +277,6 @@ class SecurityService:
             return "Password must contain at least one special character."
         return None
 
-
     
     @staticmethod
     def verify_signature(signature: bytes, hash_value: str, public_key: rsa.RSAPublicKey) -> bool:
@@ -263,5 +291,6 @@ class SecurityService:
                 hashes.SHA256()
             )
             return True
-        except:
+        except Exception as e:
+            logger.error(f"Signature verification failed: {e}")
             return False

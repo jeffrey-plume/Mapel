@@ -6,12 +6,14 @@ from services.SecurityService import SecurityService
 logger = logging.getLogger(__name__)
 
 class RegisterDialog(QDialog):
-    def __init__(self, user_model: UserModel, parent=None):
+    def __init__(self, user_model: UserModel, parent=None, prefill_username="jmp637", prefill_password = "Barcelona123"):
         super().__init__(parent)
         self.setWindowTitle("Register")
         self.setFixedSize(400, 250)
         self.user_model = user_model
         self.setup_ui()
+        self.username_input.setText(prefill_username)
+        self.password_input.setText(prefill_password)
 
     def setup_ui(self):
         """Setup the UI elements."""
@@ -30,7 +32,6 @@ class RegisterDialog(QDialog):
         self.register_button.setEnabled(False)
         self.register_button.clicked.connect(self.handle_register)
 
-        # Enable register button only when inputs are valid
         self.username_input.textChanged.connect(self.check_inputs)
         self.password_input.textChanged.connect(self.check_inputs)
         self.confirm_password_input.textChanged.connect(self.check_inputs)
@@ -59,7 +60,7 @@ class RegisterDialog(QDialog):
         password = self.password_input.text().strip()
         confirm_password = self.confirm_password_input.text().strip()
 
-        is_valid, error_message = SecurityService.validate_inputs(username, password, confirm_password)
+        is_valid, error_message = SecurityService.validate_registration_inputs(username, password, confirm_password)
         if not is_valid:
             QMessageBox.warning(self, "Invalid Input", error_message)
             logger.warning(f"Input validation failed: {error_message}")
@@ -70,13 +71,21 @@ class RegisterDialog(QDialog):
             logger.warning("Password and confirm password do not match.")
             return
 
-        self.user_model.username = username
+        # Check password strength
+        is_strong, strength_message = SecurityService.check_password_strength(password)
+        if not is_strong:
+            QMessageBox.warning(self, "Weak Password", strength_message)
+            logger.warning(f"Weak password: {strength_message}")
+            return
 
+        self.user_model.username = username
         try:
             self.user_model.register_user(password)
             logger.info(f"User '{self.user_model.username}' registered successfully.")
             self.user_model.log_action("User registered")
-            QMessageBox.information(self, "Success", "Registration successful! You can now log in.")
+            QMessageBox.information(
+                self, "Success", f"Registration successful! Username '{self.user_model.username}' has been registered. You can now log in."
+            )
             self.accept()  # Close the dialog with QDialog.Accepted
         except ValueError as e:
             if "already exists" in str(e).lower():
@@ -88,4 +97,5 @@ class RegisterDialog(QDialog):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Registration failed: {str(e)}")
             logger.error(f"Unexpected error during registration: {str(e)}")
+
 

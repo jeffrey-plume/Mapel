@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import sqlite3
 import plotly.io as pio  # Import pio properly
 
-class FitService:
+class FitServices:
     def __init__(self, conn, web_view=None):
         """Initialize with the path to the SQLite database."""
         self.conn = conn

@@ -1,43 +1,162 @@
-import sqlite3
 from datetime import datetime
-from typing import Optional, List, Tuple, Dict
+from hmac import compare_digest
 from services.SecurityService import SecurityService
 import logging
-from hmac import compare_digest
-from PyQt5.QtWidgets import QMessageBox
-import numpy as np
-import os
-import secrets
-import string
+from typing import Tuple, Optional, Dict
+import pandas as pd
+import sqlite3
 
 class UserModel:
-    def __init__(self, conn = sqlite3.connect('user_credentials.db'), username=None):
-        self.logger = logging.getLogger(__name__)
+    def __init__(self,  conn = sqlite3.connect('user_credentials.db')):
         self.conn = conn
-        self.username = username
-        self._ensure_admin_exists()
+        self.logger = logging.getLogger(__name__)
+        self.failed_attempts = {}  # {username: {"count": int, "lockout_end": datetime}}
+        self.max_attempts = 3
+        self.lockout_duration = 600  # Lockout duration in seconds
+        self.username = None
+
+    def get_user_credentials(self, username=None):
+        """
+        Retrieve user credentials for a specific username.
+
+        Args:
+            username (str): Username to fetch credentials for.
+
+        Returns:
+            Optional[Dict[str, str]]: User credentials or None if the user doesn't exist.
+        """
+        if not username:
+            username = self.username
+
+        query = '''
+            SELECT password_hash, salt, encrypted_private_key, public_key, admin
+            FROM users WHERE username = ?
+        '''
+        result = self._execute_query(query, (username,), fetch_one=True)
+
+        if not result:
+            self.logger.warning(f"User '{username}' does not exist.")
+            return None
+
+        return {
+            "username": username,
+            "password_hash": result[0],
+            "salt": result[1],
+            "encrypted_private_key": result[2],
+            "public_key": result[3],
+            "admin": bool(result[4])
+        }
+
+    def verify_credentials(self, username, password):
+        """
+        Verify user credentials.
+
+        Args:
+            username (str): Username.
+            password (str): Password.
+
+        Returns:
+            bool: True if credentials are valid, False otherwise.
+        """
+        if self.is_locked_out(username):
+            self.logger.warning(f"User '{username}' is locked out.")
+            return False
+
+        user_data = self.get_user_credentials(username)
+
+        if not user_data:
+            return False
+
+        derived_hash = SecurityService.hash_password(password, user_data["salt"])
+        return compare_digest(user_data["password_hash"], derived_hash)
+
+    def track_failed_attempt(self, username):
+        """
+        Track a failed login attempt and lock the user if necessary.
+
+        Args:
+            username (str): Username of the user who failed login.
+
+        Returns:
+            bool: True if the user is locked out, False otherwise.
+        """
+        now = datetime.now()
+
+        if username not in self.failed_attempts:
+            self.failed_attempts[username] = {"count": 0, "lockout_end": None}
+
+        attempt_data = self.failed_attempts[username]
+        attempt_data["count"] += 1
+
+        if attempt_data["count"] >= self.max_attempts:
+            attempt_data["lockout_end"] = now.timestamp() + self.lockout_duration
+            self.logger.warning(f"User '{username}' locked out due to too many failed attempts.")
+            return True
+
+        return False
+
+    def is_locked_out(self, username):
+        """
+        Check if a user is currently locked out.
+
+        Args:
+            username (str): Username to check.
+
+        Returns:
+            bool: True if the user is locked out, False otherwise.
+        """
+        if username not in self.failed_attempts:
+            return False
+
+        attempt_data = self.failed_attempts[username]
+        now = datetime.now().timestamp()
+
+        if attempt_data["lockout_end"] and now < attempt_data["lockout_end"]:
+            return True
+
+        if attempt_data["lockout_end"] and now >= attempt_data["lockout_end"]:
+            self.reset_failed_attempts(username)
+
+        return False
+
+    def reset_failed_attempts(self, username):
+        """
+        Reset the failed login attempts for a user.
+
+        Args:
+            username (str): Username to reset attempts for.
+        """
+        if username in self.failed_attempts:
+            del self.failed_attempts[username]
+            self.logger.info(f"Login attempts reset for user '{username}'.")
+
+    def _execute_query(self, query, params=(), fetch_one=False, fetch_all=False):
+        """
+        Execute a database query.
+
+        Args:
+            query (str): SQL query.
+            params (tuple): Query parameters.
+            fetch_one (bool): Fetch one row.
+            fetch_all (bool): Fetch all rows.
+
+        Returns:
+            Any: Query result.
+        """
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute(query, params)
+            if fetch_one:
+                return cursor.fetchone()
+            if fetch_all:
+                return cursor.fetchall()
+            self.conn.commit()
+        except Exception as e:
+            self.logger.error(f"Database query failed: {e}")
+            raise
 
     
-    def _ensure_admin_exists(self):
-        """Ensure at least one admin user exists in the database."""
-        try:
-            # Step 1: Initialize tables
-            self._initialize_tables()
-    
-            # Step 2: Check if an admin user already exists
-            if self._admin_exists():
-                self.logger.info("Admin user already exists.")
-                return
-    
-            # Step 3: Create a default admin user if none exists
-            admin_credentials = self._create_default_admin()
-            self.logger.info(f"Default admin created: {admin_credentials['username']}")
-            return admin_credentials
-    
-        except Exception as e:
-            self.logger.error(f"Error ensuring admin existence: {e}")
-            raise
-    
+
     
     def _initialize_tables(self):
         """Create required database tables if they do not already exist."""
@@ -52,15 +171,6 @@ class UserModel:
                     public_key TEXT NOT NULL,
                     admin INTEGER NOT NULL DEFAULT 0
                 )
-            ''',
-            "audit_trail": '''
-                CREATE TABLE IF NOT EXISTS audit_trail (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
-                    date TEXT NOT NULL,
-                    time TEXT NOT NULL,
-                    action TEXT NOT NULL
-                )
             '''
         }
     
@@ -72,82 +182,50 @@ class UserModel:
                 self.logger.error(f"Failed to initialize table '{table_name}': {e}")
                 raise
     
-
+    def ensure_admin_exists(self):
+        """Ensure at least one admin user exists, or create a default admin."""
+        try:
+            self._initialize_tables()  # Ensure tables exist
+            if self._admin_exists():
+                self.logger.info("Admin user already exists.")
+                return
+            self._create_default_admin()
+        except Exception as e:
+            self.logger.error(f"Error ensuring admin existence: {e}")
+            raise
+    
     def _admin_exists(self) -> bool:
-        """Check if at least one admin user exists in the database."""
+        """Check if at least one admin user exists."""
         query = "SELECT 1 FROM users WHERE admin = 1 LIMIT 1"
         return bool(self._execute_query(query, fetch_one=True))
     
-    
-    def _generate_secure_credentials() -> Dict[str, str]:
-        """Generate secure credentials for a default admin."""
-        username = "Admin_" + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-        password_characters = string.ascii_letters + string.digits + string.punctuation
-        password = ''.join(secrets.choice(password_characters) for _ in range(16))
-        return {"username": username, "password": password}
-    
-    
-    def _create_default_admin(self) -> Dict[str, str]:
-        """Create a default admin user and return the credentials."""
-        credentials = self._generate_secure_credentials()
-        self.username = credentials["username"]
+    def _create_default_admin(self):
+        """Create a default admin user."""
         try:
-            self.register_user(credentials["password"], is_admin=True)
-            return credentials
-        except Exception as e:
-            self.logger.error(f"Failed to create default admin user: {e}")
-            raise
-
-        # Initialize tables
-        for table_name, query in table_definitions.items():
-            try:
-                self._execute_query(query)
-            except sqlite3.Error as e:
-                self.logger.error(f"Failed to initialize table '{table_name}': {e}")
-                raise
-    
-        # Check if an admin exists
-        query = "SELECT 1 FROM users WHERE admin = 1 LIMIT 1"
-        if self._execute_query(query, fetch_one=True):
-            self.logger.info("Admin user already exists.")
-            return
-    
-        # Generate secure default admin credentials
-        admin_username = "Admin_" + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-        password_characters = string.ascii_letters + string.digits + string.punctuation
-        admin_password = ''.join(secrets.choice(password_characters) for _ in range(16))
-    
-        # Register default admin
-        self.username = admin_username
-        try:
-            self.register_user(admin_password, is_admin=True)
-            self.logger.info(f"Default admin credentials created: username={admin_username}, password={admin_password}")
+            credentials = self._generate_secure_credentials()
+            self.register_user(credentials["username"], credentials["password"], is_admin=True)
+            self.logger.info(f"Default admin created: {credentials['username']}")
             QMessageBox.information(
                 None,
                 "First Time Login",
                 f"Default admin credentials created:\n\n"
-                f"Username: {admin_username}\nPassword: {admin_password}\n\n"
+                f"Username: {credentials['username']}\nPassword: {credentials['password']}\n\n"
                 f"Please update them immediately under Utilities > User Management."
             )
         except Exception as e:
             self.logger.error(f"Failed to create default admin user: {e}")
             raise
-
-
-    def _execute_query(self, query: str, params: Tuple = (), fetch_one=False, fetch_all=False):
-        try:
-            with self.conn as conn:
-                cursor = conn.cursor()
-                cursor.execute(query, params)
-                if fetch_one:
-                    return cursor.fetchone()
-                if fetch_all:
-                    return cursor.fetchall()
-                conn.commit()
-        except sqlite3.Error as e:
-            self.logger.error(f"Database error during query execution: {str(e)}")
-            raise
     
+    @staticmethod
+    def _generate_secure_credentials() -> Dict[str, str]:
+        """Generate secure credentials."""
+        username = "Admin_" + ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+        password_characters = string.ascii_letters + string.digits + string.punctuation
+        password = ''.join(secrets.choice(password_characters) for _ in range(16))
+        return {"username": username, "password": password}
+
+
+
     def register_user(self, password: str, is_admin: bool = False):
         """Register a new user."""
         if self.get_user_credentials():
@@ -182,36 +260,6 @@ class UserModel:
     
     
         
-    def get_user_credentials(self, user = None):
-        """
-        Retrieve user credentials for a specific username.
-    
-        Args:
-            user (str): Username to fetch credentials for.
-    
-        Returns:
-            Optional[Dict[str, str]]: User credentials or None if the user doesn't exist.
-        """
-        if not user:
-            user = self.username
-    
-        query = '''
-            SELECT password_hash, salt, encrypted_private_key, public_key, admin
-            FROM users WHERE username = ?
-        '''
-        result = self._execute_query(query, (user,), fetch_one=True)
-    
-        if not result:
-            self.logger.warning(f"User '{user}' does not exist.")
-            return None
-        return {
-            "username": user,
-            "password_hash": result[0],
-            "salt": result[1],
-            "encrypted_private_key": result[2],
-            "public_key": result[3],
-            "admin": bool(result[4])
-            }
 
 
     def log_action(self, action: str):
@@ -236,23 +284,6 @@ class UserModel:
         except sqlite3.Error as e:
             self.logger.error(f"Failed to log action: {e}")
 
-    def verify_credentials(self, password: str) -> bool:
-        """Verify user credentials by comparing the password hash."""
-        if not SecurityService.validate_inputs(self.username, password):
-            return False
-    
-        user_data = self.get_user_credentials()
-        if not user_data:
-            self.logger.warning(f"User '{self.username}' does not exist.")
-            return False
-    
-        derived_hash = SecurityService.hash_password(password, user_data["salt"])
-        if compare_digest(user_data["password_hash"], derived_hash):
-            self.logger.info(f"User '{self.username}' authenticated successfully.")
-            return True
-    
-        self.logger.warning(f"Password mismatch for user '{self.username}'.")
-        return False
 
 
     
@@ -306,7 +337,8 @@ class UserModel:
         self._execute_query(query, (*fields.values(), username))
         self.log_action("User information updated")
 
-    def get_audit_trail(self, limit: int = 50, offset: int = 0) -> List[Dict[str, str]]:
+    
+    def get_audit_trail(self, limit: int = 50, offset: int = 0) -> pd.DataFrame:
         query = """
             SELECT username, date, time, action
             FROM audit_trail
@@ -314,7 +346,10 @@ class UserModel:
             LIMIT ? OFFSET ?
         """
         rows = self._execute_query(query, (limit, offset), fetch_all=True)
-        return [{"username": row[0], "date": row[1], "time": row[2], "action": row[3]} for row in rows]
+        # Convert rows to a DataFrame
+        df = pd.DataFrame(rows, columns=["username", "date", "time", "action"])
+        return df
+
 
 
     def get_all_users(self):

@@ -19,16 +19,17 @@ class LoginDialog(QDialog):
         self.lockout_duration = 10000  # Lockout duration in milliseconds (10 seconds)
         self.lockout_timer = None  # Timer for lockout
 
-    def setup_ui(self):
+    def setup_ui(self, us = 'jmp637', pw='Barcelona123'):
         """Setup the UI elements."""
         self.username_label = QLabel("Username:")
         self.username_input = QLineEdit()
-        self.username_input.setPlaceholderText("Enter your username")
-
+        #self.username_input.setPlaceholderText("Enter your username")
+        self.username_input.setText(us)
         self.password_label = QLabel("Password:")
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
-        self.password_input.setPlaceholderText("Enter your password")
+        #self.password_input.setPlaceholderText("Enter your password")
+        self.password_input.setText(pw)
 
         self.login_button = QPushButton("Login")
         self.login_button.clicked.connect(self.handle_login)
@@ -60,7 +61,7 @@ class LoginDialog(QDialog):
         # Attempt to verify credentials
         self.user_model.username = username  # Update username in UserModel
         try:
-            if self.user_model.verify_credentials(password):
+            if self.user_model.verify_credentials(username, password):
                 logger.info(f"User '{username}' logged in successfully.")
                 self.accept()  # Close the dialog with QDialog.Accepted
             else:

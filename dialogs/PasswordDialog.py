@@ -19,11 +19,12 @@ class PasswordDialog(QDialog):
 
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self, pw = "Barcelona123"):
         """Initialize UI components."""
         self.label_password = QLabel("Enter your password:")
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
+        self.password_input.setText(pw)
 
         self.label_comments = QLabel("Enter comments (optional):")
         self.comments_input = QTextEdit()
@@ -53,9 +54,10 @@ class PasswordDialog(QDialog):
             return
 
         try:
-            if self.user_model.verify_credentials(self.password):
+            if self.user_model.verify_credentials(self.user_model.username, self.password):
                 logger.info(f"User '{self.user_model.username}' authenticated successfully.")
                 self.accept()  # Close dialog with QDialog.Accepted
+                return [self.password,  self.comments]
             else:
                 self.handle_failed_submit()
         except Exception as e:
