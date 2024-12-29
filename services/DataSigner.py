@@ -17,12 +17,11 @@ class DataSigner:
         """
         self.user_model = user_model
         self.signatures = {
-            "username": [],
-            "data_hash": [],
-            "signature": [],
-            "date": [],
-            "time": [],
-            "comments": [],
+            "username": None,
+            "data_hash": None,
+            "signature": None,
+            "timestamp": None,
+            "comments": None,
         }
 
     def sign_results(self, username: str, password: str, comments: str, data: dict) -> str:
@@ -62,47 +61,17 @@ class DataSigner:
             print(signature)
 
             # Append results to the signatures dictionary
-            self.signatures["username"].append(username)
-            self.signatures["data_hash"].append(data_hash)
-            self.signatures["signature"].append(signature)
-            self.signatures["date"].append(now.strftime("%Y-%m-%d"))
-            self.signatures["time"].append(now.strftime("%H:%M:%S"))
-            self.signatures["comments"].append(comments)
+            self.signatures["username"]=username
+            self.signatures["data_hash"]=data_hash
+            self.signatures["signature"]=signature.hex()
+            self.signatures["timestamp"]=now
+            self.signatures["comments"]=comments
 
             logger.info(f"Results signed successfully by {username}.")
-            return signature
+            return self.signatures
         except Exception as e:
             logger.error(f"Failed to sign results: {e}")
             raise ValueError("Signing failed. Please check your inputs.")
 
 
-    def prepare_signatures_data(self) -> Tuple[List[Dict[str, str]], List[str]]:
-        """
-        Prepare the signatures data for display.
-
-        Returns:
-            Tuple[List[Dict[str, str]], List[str]]:
-                - A list of dictionaries, where each dict is a row for the table.
-                - A list of column headers for the table.
-        """
-        try:
-            # Prepare data rows for the table
-            table_data = [
-                {
-                    "Username": self.signatures["username"][i],
-                    "Data Hash": self.signatures["data_hash"][i],
-                    "Signature": self.signatures["signature"][i],
-                    "Date": self.signatures["date"][i],
-                    "Time": self.signatures["time"][i],
-                    "Comments": self.signatures["comments"][i],
-                }
-                for i in range(len(self.signatures["signature"]))
-            ]
-
-            # Define the column headers
-            column_headers = ["Username", "Data Hash", "Signature", "Date", "Time", "Comments"]
-
-            return table_data, column_headers
-        except Exception as e:
-            logger.error(f"Failed to prepare signatures data: {e}")
-            raise ValueError("Failed to prepare signatures data.")
+ 

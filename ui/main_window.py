@@ -198,22 +198,62 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Invalid Credentials", "Invalid username or password.")
             return
 
-        print(credentials)
-
+        if "Signatures" not in self.results:
+            self.results["Signatures"] = []
+            
         # Initialize DataSigner and sign the data
         try:
             data_signer = self.data_signer
             study_model = self.study_model  # Assuming `self.study_model.data` holds the study data to be signed
             
-            data_signer.sign_results(
+            signature = data_signer.sign_results(
                 username=self.user_model.username,
                 password=credentials[0],
                 comments=credentials[1],
                 data=self.results
              )
-            QMessageBox.information(self, "Signing Successful", "The results have been successfully signed.")
+
+            self.results["Signatures"].append(signature)
+            
+            QMessageBox.information(self, "Signing Successful", f"Signed: \n{signature['username']} \n{signature['timestamp']} \n{signature['signature']}")
         except Exception as e:
             QMessageBox.critical(self, "Signing Failed", f"An error occurred while signing the results: {e}")
+
+
+    def get_signatures_table_data(self):
+        """
+        Prepare table data for displaying signatures.
+    
+        Returns:
+            tuple: Table data (list of rows) and headers (list of column names).
+        """
+        if "Signatures" not in self.results or not self.results["Signatures"]:
+            QMessageBox.warning(self, "No Signatures", "No signatures found.")
+            return None
+    
+        headers = ["Timestamp", "Username", "Hash", "Comments", "Signature"]
+        table_data = [
+            [entry["timestamp"], entry["username"], entry["data_hash"], entry["comments"], entry["signature"]]
+            for entry in self.results["Signatures"]
+        ]
+        return table_data, headers
+
+    def view_signatures(self):
+        """
+        Display the saved signatures in a table dialog.
+        """
+        try:
+            result = self.get_signatures_table_data()
+            if not result:
+                return  # No action if no signatures are found
+    
+            table_data, headers = result
+            dialog = TableDialog(table_data, headers, title="Signatures", parent=self)
+            dialog.exec_()
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to display signatures: {e}")
+            self.logger.error("Failed to display signatures: %s", str(e))
+    
 
             
     def create_action(self, name, handler, icon=None):
@@ -225,28 +265,7 @@ class MainWindow(QMainWindow):
             action.setIconVisibleInMenu(False)  # Use text-only action if icon is missing
         action.triggered.connect(handler)
         return action
-
-    def view_signatures(self):
-        """
-        Display the signed results in the TableDialog.
-        """
-        try:
-            # Ensure signatures are available
-            if not self.study_model.signatures["signature"]:
-                QMessageBox.information(self, "No Signatures", "No signatures available to display.")
-                return
-                
-            data_signer = self.data_signer
-            # Prepare the data for the TableDialog
-            table_data, column_headers = data_signer.prepare_signatures_data()
-    
-            # Show the table dialog
-            table_dialog = TableDialog(table_data, column_headers, title="Signatures and Data Hashes", parent=self)
-            table_dialog.exec_()
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to display signatures: {e}")    
-
-
+        
 
     def load_module_options(self):
         """Load available modules from the 'Modules' folder."""
