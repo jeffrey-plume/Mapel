@@ -1,0 +1,9 @@
+2024-12-28 18:14:30 - System - __main__ - INFO - Running in standard mode
+2024-12-28 18:14:30 - System - __main__ - INFO - Starting the application.
+2024-12-28 18:14:30 - System - __main__ - INFO - Connected to database at user_credentials.db
+2024-12-28 18:14:30 - System - __main__ - INFO - Services initialized successfully.
+2024-12-28 18:14:52 - System - __main__ - INFO - File list initialized with 14 files.
+2024-12-28 18:14:52 - System - __main__ - INFO - FileManagementDialog opened with 14 files.
+2024-12-28 18:14:58 - System - __main__ - INFO - Updating current index from 0 to 1.
+2024-12-28 18:14:58 - System - __main__ - INFO - Updating current index from 1 to 2.
+2024-12-28 18:14:59 - System - __main__ - INFO - Updating current index from 2 to 3.

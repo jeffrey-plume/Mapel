@@ -15,16 +15,23 @@ import tempfile
 import importlib.util
 from dialogs.ImageViewer import ImageViewer
 from services.DataSigner import DataSigner
-from Modules.__Importer import __Importer
+import json
+import logging
+import os
+
 
 
 class MainWindow(QMainWindow):
-    def __init__(self, user_model, parent=None):
+    def __init__(self, user_model, logger = None, parent=None):
         super().__init__()
         self.setGeometry(300, 100, 400, 100)
 
         self.open_windows = []
         self.user_model = user_model
+        self.logger = logger
+        self.logger.username = user_model.username
+
+        self.user_model.logger = self.logger
         self.study_model = StudyModel(self.user_model)
         self.unsaved_changes = False
         self.data_signer = DataSigner(self.user_model)
@@ -55,7 +62,6 @@ class MainWindow(QMainWindow):
         self.main_layout.addWidget(self.module_status_label)
         self.study_model.files_imported.connect(self.open_file_management)
 
-        print("MainWindow initialization complete.")  # Debug log
 
     def create_menu_bar(self):
         """Create the menu bar."""
@@ -92,12 +98,12 @@ class MainWindow(QMainWindow):
         # Utilities menu
         utilities_menu = menu_bar.addMenu("Utilities")
 
-        utilities_menu.addAction(self.create_action("Open Tabular", self.open_tabular))
-        utilities_menu.addAction(self.create_action("Open Imager", self.open_image))
+        utilities_menu.addAction(self.create_action("Open Table View", self.open_tabular))
+        utilities_menu.addAction(self.create_action("Open Image View", self.open_image))
         utilities_menu.addSeparator()
 
         utilities_menu.addAction(self.create_action("File Management", self.open_file_management))
-        utilities_menu.addAction(self.create_action("View Audit Trail", self.view_study_audit_trail))
+        utilities_menu.addAction(self.create_action("View Audit Trail", self.view_audit_trail))
         utilities_menu.addAction(self.create_action("View Signatures", self.view_signatures))
 
 
@@ -137,7 +143,7 @@ class MainWindow(QMainWindow):
         self.run_button_action.setDisabled(True)
         toolbar.addAction(self.run_button_action)
     
-        toolbar.addAction(self.create_action("Audit Trail", self.view_study_audit_trail, "icons/audit_logo.png"))
+        toolbar.addAction(self.create_action("Audit Trail", self.view_audit_trail, "icons/audit_logo.png"))
         toolbar.addAction(self.create_action("Sign Results", self.sign_results, "icons/signature_logo.png"))
 
     def open_tabular(self):
@@ -175,12 +181,9 @@ class MainWindow(QMainWindow):
         Sign the results stored in the study model.
         Prompts the user for credentials, validates them, and signs the data.
         """
-        if not self.user_model:
-            QMessageBox.warning(self, "No User", "No user data found.")
-            return
-    
-        if not self.study_model:
-            QMessageBox.warning(self, "No Study Data", "No study data found to sign.")
+        self.results['Audit_Trail'] = self.get_audit_trail()
+        if not self.results['Audit_Trail']:
+            QMessageBox.warning(self, "Audit Trail Missing", "No audit trail data available.")
             return
     
         # Launch PasswordDialog to get user credentials
@@ -195,7 +198,8 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Invalid Credentials", "Invalid username or password.")
             return
 
-        print(credentials[0])
+        print(credentials)
+
         # Initialize DataSigner and sign the data
         try:
             data_signer = self.data_signer
@@ -205,7 +209,7 @@ class MainWindow(QMainWindow):
                 username=self.user_model.username,
                 password=credentials[0],
                 comments=credentials[1],
-                data={'test':'test'}
+                data=self.results
              )
             QMessageBox.information(self, "Signing Successful", "The results have been successfully signed.")
         except Exception as e:
@@ -240,7 +244,8 @@ class MainWindow(QMainWindow):
             table_dialog = TableDialog(table_data, column_headers, title="Signatures and Data Hashes", parent=self)
             table_dialog.exec_()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to display signatures: {e}")
+            QMessageBox.critical(self, "Error", f"Failed to display signatures: {e}")    
+
 
 
     def load_module_options(self):
@@ -285,8 +290,8 @@ class MainWindow(QMainWindow):
         """
         module_dir = os.path.join(os.getcwd(), "Modules")
         module_path = os.path.join(module_dir, f"{module_name}.py")
-        print(module_path)
-        print(module_name)
+
+        
         if not os.path.exists(module_path):
             raise ImportError(f"Module file not found: {module_path}")
     
@@ -333,7 +338,6 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Invalid Index", "Current index is out of range.")
             return
 
-        print(self.file_list)
 
         try:
             # Instantiate the processor and process the image
@@ -363,83 +367,181 @@ class MainWindow(QMainWindow):
     
         Args:
             file_list (list): List of file paths to manage.
-        """
+        """    
         if not file_list:
             QMessageBox.warning(self, "No Files", "The imported file list is empty.")
+            self.logger.warning("Attempted to open File Management dialog with no files.")
             return
+    
         self.file_list = file_list
+        
         self.results['Importer'] = {file: None for file in file_list}  # Initialize files dictionary
+        self.logger.info("File list initialized with %d files.", len(file_list))
     
         # Check if the dialog is already open
         if self.file_management_dialog and self.file_management_dialog.isVisible():
             QMessageBox.information(self, "File Management", "File Management is already open.")
+            self.logger.info("File Management dialog is already open.")
             return
     
-        # Initialize the FileManagementDialog
-        self.file_management_dialog = FileManagementDialog(self.results['Importer'])
+        try:
+            # Initialize the FileManagementDialog
+            self.file_management_dialog = FileManagementDialog(self.results['Importer'])
     
-        # Properly connect signal for current index change
-        self.file_management_dialog.current_index_changed.connect(self.update_current_index)
-
-        self.open_windows.append(self.file_management_dialog)
-        self.file_management_dialog.show()
+            # Properly connect signal for current index change
+            self.file_management_dialog.current_index_changed.connect(self.update_current_index)
     
-        print(f"FileManagementDialog opened with files: {self.results['Importer']}")
+            self.open_windows.append(self.file_management_dialog)
+            self.file_management_dialog.show()
+    
+            self.logger.info("FileManagementDialog opened with %d files.", len(self.results['Importer']))
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to open File Management dialog: {e}")
+            self.logger.error("Error opening File Management dialog: %s", str(e))
 
-        
-        
 
     def update_current_index(self, index):
+        """
+        Update the current index for the file management system.
+    
+        Args:
+            index (int): The new index to set.
+        """
+        if not self.file_list:
+            self.logger.warning("Attempted to set an invalid index")
+            return
 
-        if 0 <= index < len(self.file_list):
+        keys = list(self.file_list.keys())
+
+        
+        if 0 <= index < len(keys):
+            self.logger.info("Updating file %s", keys[index])
             self.current_index = index
         else:
             QMessageBox.warning(None, "Invalid Index", "Index out of range.")
+            self.logger.warning("Attempted to set an invalid index")
 
-
-    def view_study_audit_trail(self):
-        """Open the study-specific audit trail dialog."""
-        if not self.study_model:
-            QMessageBox.warning(self, "Error", "No study file is open.")
-            return
-        audit_data = self.study_model.audit_trail # Get audit trail as list of dicts
-        column_headers = ["Username", "Action", "Date", "Time"]  # Match the structure of your audit data
+    
+    def get_audit_trail(self):
+        """
+        Retrieve and parse the audit trail log file.
         
-        dialog = TableDialog(table_data=audit_data, column_headers=column_headers, title="Audit Trail", parent = self)
-        dialog.exec_()
+        Returns:
+            tuple: A tuple containing table_data (list) and headers (list) or None if an error occurs.
+        """
+        try:
+            log_path = os.path.join(os.getcwd(), "logs", "audit_trail.log")
+            if not os.path.exists(log_path):
+                QMessageBox.warning(self, "Audit Trail", "No audit trail file found.")
+                return None
+            
+            with open(log_path, "r") as log_file:
+                try:
+                    logs = [json.loads(line) for line in log_file]
+                except json.JSONDecodeError as e:
+                    QMessageBox.critical(self, "Error", f"Failed to parse audit trail data: {e}")
+                    return None
+            
+            if not logs:
+                QMessageBox.information(self, "Audit Trail", "The audit trail is empty.")
+                return None
+    
+            headers = ["Timestamp", "Username", "Action"]
+            table_data = [
+                [log["timestamp"], log["username"], log["message"]] for log in logs
+            ]
+            return table_data, headers
+                
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load audit trail: {e}")
+            return None
+    
+    def view_audit_trail(self):
+        """
+        Display the audit trail in a table dialog.
+        """
+        try:
+            result = self.get_audit_trail()
+            if not result:
+                return  # No action if audit trail is empty or not found
+    
+            table_data, headers = result
+            dialog = TableDialog(table_data, headers, title="Audit Trail", parent=self)
+            dialog.exec_()
+        
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to load audit trail: {e}")
+    
+        
+    
 
         
     def closeEvent(self, event):
-        """Handle unsaved changes and close all open windows."""
-        if self.unsaved_changes:
-            reply = QMessageBox.question(self, "Unsaved Changes",
-                                         "You have unsaved changes. Do you want to save before exiting?",
-                                         QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
-            if reply == QMessageBox.Yes:
-                self.study_model.save_file()
-                event.accept()
-            elif reply == QMessageBox.No:
-                event.accept()
-            else:
-                event.ignore()
-                return
+        """
+        Handle unsaved changes, prompt the user, and close all open windows.
+        """
+        try:
+            # Check for unsaved changes
+            if self.unsaved_changes:
+                reply = QMessageBox.question(
+                    self, 
+                    "Unsaved Changes",
+                    "You have unsaved changes. Do you want to save before exiting?",
+                    QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+                )
+                if reply == QMessageBox.Yes:
+                    self.study_model.save_file()
+                    self.logger.info("Unsaved changes saved before closing.")
+                    event.accept()
+                elif reply == QMessageBox.No:
+                    self.logger.info("Unsaved changes discarded. Closing application.")
+                    event.accept()
+                else:
+                    self.logger.info("Close event canceled by the user.")
+                    event.ignore()
+                    return
     
-        self.close_all_windows()
-        self.user_model.log_action(action = "Application closed")
-        event.accept()
-
-   
+            # Close all open windows
+            self.close_all_windows()
+            
+            # Log the application closure
+            self.user_model.log_action(action="Application closed")
+            self.logger.info("Application closed successfully.")
+            event.accept()
+    
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred while closing the application: {str(e)}")
+            self.logger.error("Error during closeEvent: %s", str(e))
+            event.ignore()
+    
     def close_all_windows(self):
-        """Close all open processor windows."""
-        for window in self.open_windows:
-            if window:
-                window.close()
-        self.open_windows.clear()
-
+        """
+        Close all open processor windows and clear the tracking list.
+        """
+        try:
+            self.logger.info("Closing all open processor windows.")
+            for window in self.open_windows:
+                if window and not window.isHidden():
+                    window.close()
+                    self.logger.info("Closed window: %s", window.windowTitle())
+            self.open_windows.clear()
+            self.logger.info("All open windows closed successfully.")
+        except Exception as e:
+            self.logger.error("Error while closing windows: %s", str(e))
+            QMessageBox.critical(self, "Error", f"An error occurred while closing windows: {str(e)}")
+    
     def open_user_management(self):
-        """Open the user management dialog."""
-        dialog = UserAccessDialog(self.user_model)
-        dialog.exec_()
+        """
+        Open the user management dialog.
+        """
+        try:
+            self.logger.info("Opening User Management dialog.")
+            dialog = UserAccessDialog(self.user_model)
+            dialog.exec_()
+            self.logger.info("User Management dialog closed.")
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"An error occurred while opening User Management: {str(e)}")
+            self.logger.error("Error opening User Management dialog: %s", str(e))
 
 
 if __name__ == "__main__":

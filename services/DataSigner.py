@@ -51,10 +51,15 @@ class DataSigner:
 
             # Retrieve encrypted private key
             encrypted_key = user_model.get_private_key(password)
+            print(encrypted_key)
+            serialized_data = SecurityService.serialize_dict(data)
 
             # Hash the data and generate the signature
-            data_hash = SecurityService.hash_data(SecurityService.serialize_dict(data))
+            data_hash = SecurityService.hash_data(serialized_data)
+            print(data_hash)
+
             signature = SecurityService.sign_hash(data_hash, encrypted_key)
+            print(signature)
 
             # Append results to the signatures dictionary
             self.signatures["username"].append(username)
@@ -69,6 +74,7 @@ class DataSigner:
         except Exception as e:
             logger.error(f"Failed to sign results: {e}")
             raise ValueError("Signing failed. Please check your inputs.")
+
 
     def prepare_signatures_data(self) -> Tuple[List[Dict[str, str]], List[str]]:
         """

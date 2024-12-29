@@ -11,6 +11,8 @@ from cryptography.hazmat.primitives.padding import PKCS7
 from cryptography.hazmat.backends import default_backend
 import json
 from typing import Tuple, Optional
+import numpy as np
+
 
 class SecurityService:
     """Service for encryption, decryption, and user credential management."""
@@ -200,10 +202,8 @@ class SecurityService:
         )
         return SecurityService.encrypt_with_password(private_bytes, password)
 
-
-        
     @staticmethod  
-    def serialize_dict(data_dict: dict) -> dict:
+    def serialize_dict(data_dict):
         """
         Recursively serialize a dictionary, converting unsupported data types.
         
@@ -213,17 +213,24 @@ class SecurityService:
         Returns:
             dict: Serialized dictionary with JSON-compatible data types.
         """
+        
+                       
+        if not data_dict:
+            raise ValueError("Cannot serialize empty or None data.")
+    
         serialized = {}
         for key, value in data_dict.items():
             if isinstance(value, dict):
                 # Recursively handle nested dictionaries
                 serialized[key] = SecurityService.serialize_dict(value)
-            elif isinstance(value, (list, tuple)):  # Handle list or tuple
-                serialized[key] = list(value)
+            elif isinstance(value, np.ndarray):
+                serialized[key] = value.tolist()
             else:
-                # Convert unsupported types to strings
                 serialized[key] = value
-        return serialized
+    
+        return  serialized
+        
+
 
 
     @staticmethod

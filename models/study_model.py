@@ -8,8 +8,6 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialog
 from services.SecurityService import SecurityService
 
 
-logger = logging.getLogger(__name__)
-
 import h5py
 import os
 from datetime import datetime
@@ -112,7 +110,7 @@ class StudyModel(QObject):
         self.audit_trail["action"].append(action)
         self.audit_trail["date"].append(now.strftime("%Y-%m-%d"))
         self.audit_trail["time"].append(now.strftime("%H:%M:%S"))
-        logger.info(f"Action logged: {action}")
+      
 
 
 

@@ -6,89 +6,72 @@ import csv
 import os
 from typing import Tuple
 
-class TableDialog(QDialog):  # Inherit from QDialog
-    def __init__(self, table_data, column_headers, title, parent=None):
-        super(TableDialog, self).__init__(parent)  # Properly initialize QDialog
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QTableWidget, QTableWidgetItem, QHeaderView, QPushButton, QHBoxLayout
+
+class TableDialog(QDialog):
+    def __init__(self, table_data, column_headers, title="Table View", parent=None):
+        super().__init__(parent)
         self.setWindowTitle(title)
         self.resize(800, 600)
 
-        if table_data is None or table_data.empty:
-            QMessageBox.warning(self, "No Data", "No data available to export.")
-            return
+        # Create main layout
+        self.layout = QVBoxLayout(self)
 
-        # Main layout
-        layout = QVBoxLayout(self)
-
-        # Table widget for displaying data
+        # Create table widget
         self.table = QTableWidget(self)
-        layout.addWidget(self.table)
+        self.table.setRowCount(len(table_data))
+        self.table.setColumnCount(len(column_headers))
+        self.table.setHorizontalHeaderLabels(column_headers)
 
-        # Configure table
-        if not table_data.empty:  # Check if DataFrame is not empty
-            self.table.setRowCount(len(table_data))
-            self.table.setColumnCount(len(column_headers))
-            self.table.setHorizontalHeaderLabels(column_headers)
-            self.populate_table(table_data, column_headers)
-            self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)  # Dynamic resizing
-        else:
-            QMessageBox.warning(self, "No Data", "No data available to display.")
-            self.table.setRowCount(0)
-            self.table.setColumnCount(0)
+        # Populate table with data
+        for row_idx, row_data in enumerate(table_data):
+            for col_idx, cell_data in enumerate(row_data):
+                self.table.setItem(row_idx, col_idx, QTableWidgetItem(str(cell_data)))
 
-        # Export button
-        self.export_button = QPushButton("Export to CSV", self)
+        # Adjust table to fit contents
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.verticalHeader().setVisible(False)
+        self.table.setSortingEnabled(True)
+
+        # Add table to the layout
+        self.layout.addWidget(self.table)
+
+        # Add buttons for closing or exporting
+        self.button_layout = QHBoxLayout()
+        self.close_button = QPushButton("Close")
+        self.close_button.clicked.connect(self.close)
+
+        self.export_button = QPushButton("Export to CSV")
         self.export_button.clicked.connect(self.export_to_csv)
-        layout.addWidget(self.export_button)
 
-        # Disable export button if no data
-        self.export_button.setEnabled(not table_data.empty)
-
-    def populate_table(self, table_data, column_headers):
-        """Fill the table with data."""
-        for row_idx, row_data in table_data.iterrows():  # Iterate over DataFrame rows
-            for col_idx, header in enumerate(column_headers):
-                value = row_data.get(header, "")
-                if value == "":
-                    self.table.setItem(row_idx, col_idx, QTableWidgetItem("(Missing)"))
-                else:
-                    self.table.setItem(row_idx, col_idx, QTableWidgetItem(str(value)))
+        self.button_layout.addWidget(self.close_button)
+        self.button_layout.addWidget(self.export_button)
+        self.layout.addLayout(self.button_layout)
 
     def export_to_csv(self):
-        """Export the table data to a CSV file."""
-        if self.table.rowCount() == 0:
-            QMessageBox.warning(self, "No Data", "No data available to export.")
+        """
+        Export the table data to a CSV file.
+        """
+        import csv
+        from PyQt5.QtWidgets import QFileDialog
+
+        options = QFileDialog.Options()
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save CSV", "", "CSV Files (*.csv);;All Files (*)", options=options)
+        if not file_path:
             return
 
-        file_path, _ = QFileDialog.getSaveFileName(self, "Save Table", "", "CSV Files (*.csv)")
-        if file_path:
-            # Confirm overwrite if file exists
-            if os.path.exists(file_path):
-                reply = QMessageBox.question(
-                    self,
-                    "Overwrite Confirmation",
-                    f"The file '{file_path}' already exists. Do you want to overwrite it?",
-                    QMessageBox.Yes | QMessageBox.No,
-                )
-                if reply == QMessageBox.No:
-                    return
-
-            try:
-                with open(file_path, mode="w", newline="", encoding="utf-8") as file:
-                    writer = csv.writer(file)
-                    # Write headers
-                    headers = [self.table.horizontalHeaderItem(col).text() for col in range(self.table.columnCount())]
-                    writer.writerow(headers)
-
-                    # Write data rows
-                    for row in range(self.table.rowCount()):
-                        row_data = [
-                            self.table.item(row, col).text() if self.table.item(row, col) else ""
-                            for col in range(self.table.columnCount())
-                        ]
-                        writer.writerow(row_data)
-                QMessageBox.information(self, "Success", "Table exported successfully!")
-            except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to export table: {e}")
+        try:
+            with open(file_path, "w", newline='', encoding="utf-8") as csv_file:
+                writer = csv.writer(csv_file)
+                # Write headers
+                writer.writerow([self.table.horizontalHeaderItem(i).text() for i in range(self.table.columnCount())])
+                # Write table data
+                for row in range(self.table.rowCount()):
+                    row_data = [self.table.item(row, col).text() if self.table.item(row, col) else "" for col in range(self.table.columnCount())]
+                    writer.writerow(row_data)
+        except Exception as e:
+            from PyQt5.QtWidgets import QMessageBox
+            QMessageBox.critical(self, "Error", f"Failed to save CSV: {e}")
 
 
 

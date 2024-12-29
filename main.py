@@ -7,9 +7,10 @@ from PyQt5.QtWidgets import QApplication, QDialog, QMessageBox
 from dialogs.LoginDialog import LoginDialog
 from ui.main_window import MainWindow
 from models.user_model import UserModel
+from datetime import datetime
+import json
 
-# Set up logging at the module level
-logger = logging.getLogger(__name__)
+
 
 def parse_args():
     """Parse command-line arguments."""
@@ -42,6 +43,41 @@ def show_fatal_error(message):
     msg_box.setText(message)
     msg_box.exec_()
 
+class UserFormatter(logging.Formatter):
+    """
+    Custom formatter to log messages as JSON for an audit trail.
+    """
+    def format(self, record):
+        log_entry = {
+            "timestamp": self.formatTime(record, self.datefmt),
+            "username": getattr(record, "username", "System"),
+            "logger_name": record.name,
+            "log_level": record.levelname,
+            "message": record.getMessage()
+        }
+        return json.dumps(log_entry)
+
+def setup_logger(name, username="System"):
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        log_dir = os.path.join(os.getcwd(), "logs")  # Create logs directory
+        os.makedirs(log_dir, exist_ok=True)  # Ensure the directory exists
+        log_path = os.path.join(log_dir, 'audit_trail.log')
+
+        handler = logging.FileHandler(log_path)
+
+        # Define custom format including username
+        formatter = UserFormatter(
+            datefmt='%Y-%m-%d %H:%M:%S',
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.DEBUG)
+
+    return logger
+
+logger = setup_logger(__name__, "System")
+
 def main():
     args = parse_args()
     setup_logging(args.debug)
@@ -64,7 +100,10 @@ def main():
             sys.exit(0)
 
         # Launch MainWindow
-        main_window = MainWindow(user_model)
+        logger.username = user_model.username
+        logger.info(f"User {user_model.username} logged in.")
+
+        main_window = MainWindow(user_model, logger = logger)
         main_window.show()
 
         sys.exit(app.exec_())  # Exit only when the application closes
