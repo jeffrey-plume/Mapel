@@ -1,6 +1,0 @@
-2024-12-28 18:42:50 - System - __main__ - INFO - Running in standard mode
-2024-12-28 18:42:50 - System - __main__ - INFO - Starting the application.
-2024-12-28 18:42:50 - System - __main__ - INFO - Connected to database at user_credentials.db
-2024-12-28 18:42:50 - System - __main__ - INFO - Services initialized successfully.
-2024-12-28 18:42:55 - System - __main__ - INFO - Login canceled by user.
-2024-12-28 18:42:55 - System - __main__ - INFO - Database connection closed.

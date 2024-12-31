@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox, QDialog
 from services.SecurityService import SecurityService
 
 
-import h5py
+from h5py import File, Group
 import os
 from datetime import datetime
 from PyQt5.QtCore import QObject, pyqtSignal
@@ -18,29 +18,11 @@ from PyQt5.QtWidgets import QFileDialog, QMessageBox
 class StudyModel(QObject):
     files_imported = pyqtSignal(dict)  # Signal emitted after files are imported
 
-    def __init__(self, user_model, file_path=None):
+    def __init__(self, data_dict, file_path=None):
         super().__init__()
         self.file_path = file_path or f"{os.path.join(tempfile.gettempdir(), 'new_study.mapel')}"
-        self.username = user_model.username
-        self.audit_trail = self.initialize_audit_trail()
-        self.signatures = self.initialize_signatures()
         self.data = {}
 
-    @staticmethod
-    def initialize_audit_trail():
-        return {"username": [], "action": [], "date": [], "time": []}
-
-    @staticmethod
-    def initialize_signatures():
-        return {"username": [], "data_hash": [], "signature": [], "date": [], "time": [], "comments": []}
-
-    def log_action(self, action):
-        """Log an action in the audit trail."""
-        now = datetime.now()
-        self.audit_trail["username"].append(self.username)
-        self.audit_trail["action"].append(action)
-        self.audit_trail["date"].append(now.strftime("%Y-%m-%d"))
-        self.audit_trail["time"].append(now.strftime("%H:%M:%S"))
 
     def open_file(self):
         """Open an existing file and load its data."""
@@ -48,13 +30,21 @@ class StudyModel(QObject):
         if file_path:
             self.file_path = file_path
             self.load_data()
-            self.log_action(f"File opened: {file_path}")
+
 
     def save_file(self):
-        """Save data to the current file."""
-        self._save_to_hdf5(self.file_path)
-        self.log_action(f"File saved: {self.file_path}")
 
+        if self.file_path:
+            # Function to recursively save nested dictionary to HDF5
+            try:
+                # Save nested dictionary to HDF5 file
+                with File(self.file_path, 'w') as h5f:
+                    self._save_dict_to_hdf5(self.processed_images, h5f)
+
+                self.unsaved_changes = False
+            except Exception as e:
+                print(f"An error occurred: {e}")
+            
     def save_as(self):
         """Save data to a new file."""
         file_path, _ = QFileDialog.getSaveFileName(None, "Save File As", "", "Mapel Files (*.mapel)")
@@ -67,27 +57,23 @@ class StudyModel(QObject):
         try:
             with h5py.File(self.file_path, "r") as hdf:
                 self.data = {key: hdf[key][()] for key in hdf.keys()}
-            self.log_action(f"Data loaded from: {self.file_path}")
         except Exception as e:
             QMessageBox.critical(None, "Error", f"Failed to load file: {e}")
 
-    def _save_to_hdf5(self, file_path):
-        """Save data to an HDF5 file."""
-        try:
-            with h5py.File(file_path, "w") as hdf:
-                for key, value in {"audit_trail": self.audit_trail, "signatures": self.signatures, "data": self.data}.items():
-                    hdf.create_dataset(key, data=value)
-        except Exception as e:
-            QMessageBox.critical(None, "Error", f"Failed to save file: {e}")
+    def _save_dict_to_hdf5(data_dict, h5_group):
+        for key, value in data_dict.items():
+            if isinstance(value, dict):
+                # If the value is a dictionary, create a group
+                subgroup = h5_group.create_group(str(key))
+                save_dict_to_hdf5(value, subgroup)
+            else:
+                # Otherwise, save the array
+                h5_group.create_dataset(str(key), data=value)
 
     def create_new_file(self):
         """Create a new file."""
         self.file_path = f"{os.path.join(tempfile.gettempdir(), 'new_study.mapel')}"
         self.data = {}
-        self.results = {}
-        self.audit_trail = self.initialize_audit_trail()
-        self.signatures = self.initialize_signatures()
-        self.log_action("New file created.")
 
     def import_files(self):
         """Import multiple files."""
@@ -97,19 +83,8 @@ class StudyModel(QObject):
             for file_path in files:
                 self.data[file_path] = None
             self.files_imported.emit(self.data)
-            self.log_action(f"Imported {len(files)} files.")
 
 
-    def log_action(self, action: str):
-        """Add an action to the audit trail."""
-        if not self.username:
-            raise ValueError("Username is not set. Cannot log action.")
-
-        now = datetime.now()
-        self.audit_trail["username"].append(self.username)
-        self.audit_trail["action"].append(action)
-        self.audit_trail["date"].append(now.strftime("%Y-%m-%d"))
-        self.audit_trail["time"].append(now.strftime("%H:%M:%S"))
       
 
 

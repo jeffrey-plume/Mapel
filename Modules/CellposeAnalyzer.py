@@ -13,19 +13,19 @@ from dialogs.ImageViewer import ImageViewer
 
 
 class CellposeAnalyzer(ImageViewer):
-    def __init__(self, image_paths=None, index=0, model_type="cyto", diameter=25, gpu=True):
+    def __init__(self, image_paths=None, image_names = None, index=0, model_type="cyto", diameter=25, gpu=True):
         """
         Subclass of ImageViewer that integrates Cellpose analysis.
         """
         # Initialize the parent class (ImageViewer)
-        super().__init__(image_paths=image_paths, index=index)
+        super().__init__(image_paths=image_paths, image_names = image_names, index=index, title = 'CellposeAnalyzer')
 
         # Additional attributes specific to CellposeAnalyzer
         self.model_type = model_type
         self.diameter = diameter
         self.gpu = gpu
         self.segmented_images = {}
-
+        self.title = title
         # Initialize the Cellpose model
         self.model = models.CellposeModel(model_type=model_type, gpu=gpu)
 

@@ -1,23 +1,33 @@
-from dialogs.TableDialog import TableDialog  # Dialog for viewing audit trails
-from dialogs.UserAccessDialog import UserAccessDialog  # Dialog for user management
-from dialogs.PasswordDialog import PasswordDialog
-from services.SecurityService import SecurityService
-from dialogs.FileManagementDialog import FileManagementDialog
-from models.study_model import StudyModel  # For managing study-specific data
-from models.user_model import UserModel  # For managing user credentials
-from utils.dialog_helper import DialogHelper  # Utility for displaying dialogs
-from PyQt5.QtCore import QSize, QFile, Qt
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QMainWindow, QAction, QFileDialog, QMessageBox, QVBoxLayout, QWidget, QToolBar, QMenu, QLabel, QDialog
-from datetime import datetime
+# Standard library imports
 import os
-import tempfile
-import importlib.util
-from dialogs.ImageViewer import ImageViewer
-from services.DataSigner import DataSigner
 import json
 import logging
-import os
+from datetime import datetime
+import tempfile
+import importlib.util
+import h5py 
+import numpy as np
+
+# PyQt5 imports
+from PyQt5.QtCore import QSize, QFile, Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (
+    QMainWindow, QAction, QFileDialog, QMessageBox, QVBoxLayout,
+    QWidget, QToolBar, QMenu, QLabel, QDialog
+)
+
+# Application-specific imports
+from dialogs.TableDialog import TableDialog
+from dialogs.UserAccessDialog import UserAccessDialog
+from dialogs.PasswordDialog import PasswordDialog
+from dialogs.FileManagementDialog import FileManagementDialog
+from dialogs.ImageViewer import ImageViewer
+from services.SecurityService import SecurityService
+from services.DataSigner import DataSigner
+from services.LoggingServices import setup_logger
+from models.user_model import UserModel
+from utils.dialog_helper import DialogHelper
+
 
 
 
@@ -25,26 +35,27 @@ class MainWindow(QMainWindow):
     def __init__(self, user_model, logger = None, parent=None):
         super().__init__()
         self.setGeometry(300, 100, 400, 100)
+        self.file_path = os.path.join(tempfile.gettempdir(), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.mapel")
 
         self.open_windows = []
         self.user_model = user_model
-        self.logger = logger
-        self.logger.username = user_model.username
-
-        self.user_model.logger = self.logger
-        self.study_model = StudyModel(self.user_model)
         self.unsaved_changes = False
         self.data_signer = DataSigner(self.user_model)
-        self.results = {}
+
+        self.logger = logger or setup_logger(name=__name__,  username=user_model.username, filename=f'{self.file_path}.log')
+        self.logger.filename = self.file_path.replace(".mapel", ".log")
+        self.user_model.logger = self.logger
 
 
         self.file_management_dialog = None
+        self.results = {}
         self.selected_option = None
         self.options = {}
         self.processor = {}
         self.loaded_modules = {}
         self.file_list = []
-        self.status_label = "No Module Selected"
+        self.directory = None
+        self.filenames = []
         self.current_index = 0
 
         # Create central widget and layout
@@ -57,10 +68,9 @@ class MainWindow(QMainWindow):
 
         self.module_status_label = QLabel("No module loaded", self)
         self.module_status_label.setStyleSheet(
-            "color: red; font-weight: bold; font-size: 14px; background-color: black;"
+            "color: red; font-weight: bold; font-size: 14px;"
         )
         self.main_layout.addWidget(self.module_status_label)
-        self.study_model.files_imported.connect(self.open_file_management)
 
 
     def create_menu_bar(self):
@@ -69,12 +79,12 @@ class MainWindow(QMainWindow):
     
         # File menu
         file_menu = menu_bar.addMenu("File")
-        file_menu.addAction(self.create_action("New File", self.study_model.create_new_file))
-        file_menu.addAction(self.create_action("Open File", self.study_model.open_file))
-        file_menu.addAction(self.create_action("Save File", self.study_model.save_file))
-        file_menu.addAction(self.create_action("Save As", self.study_model.save_as))
+        file_menu.addAction(self.create_action("New File", self.create_new_file))
+        file_menu.addAction(self.create_action("Open File", self.open_file))
+        file_menu.addAction(self.create_action("Save File", self.save_file))
+        file_menu.addAction(self.create_action("Save As", self.save_as))
         file_menu.addSeparator()
-        file_menu.addAction(self.create_action("Import", self.study_model.import_files))
+        file_menu.addAction(self.create_action("Import", self.import_files))
         file_menu.addSeparator()
         file_menu.addAction(self.create_action("Exit", self.close))
     
@@ -85,9 +95,8 @@ class MainWindow(QMainWindow):
         self.module_menu = QMenu("Module", self)
         self.load_module_options()
         analysis_menu.addMenu(self.module_menu)
+        analysis_menu.addAction(self.create_action("File Management", self.open_file_management))
 
-        
-                
         # Add Run action
         self.run_action = self.create_action("Run", self.run_selected_option)
         self.run_action.setDisabled(True)  # Initially disabled
@@ -102,7 +111,6 @@ class MainWindow(QMainWindow):
         utilities_menu.addAction(self.create_action("Open Image View", self.open_image))
         utilities_menu.addSeparator()
 
-        utilities_menu.addAction(self.create_action("File Management", self.open_file_management))
         utilities_menu.addAction(self.create_action("View Audit Trail", self.view_audit_trail))
         utilities_menu.addAction(self.create_action("View Signatures", self.view_signatures))
 
@@ -119,9 +127,16 @@ class MainWindow(QMainWindow):
         self.addToolBar(Qt.TopToolBarArea, toolbar)  # Anchor toolbar to the top
     
         # Add actions to toolbar
-        toolbar.addAction(self.create_action("New", self.study_model.create_new_file, "icons/new_file.png"))
-        toolbar.addAction(self.create_action("Open", self.study_model.open_file, "icons/open_file.png"))
-        toolbar.addAction(self.create_action("Save", self.study_model.save_file, "icons/save_file.png"))
+        toolbar.addAction(self.create_action("New", self.create_new_file, "icons/new_file.png"))
+        toolbar.addAction(self.create_action("Open", self.open_file, "icons/open_file.png"))
+        toolbar.addAction(self.create_action("Save", self.save_file, "icons/save_file.png"))
+        toolbar.addSeparator()
+
+        # Add Import Files action
+        import_action = QAction("Import Files", self)
+        import_action.setIcon(QIcon("icons/import_file.png"))
+        import_action.triggered.connect(self.import_files)
+        toolbar.addAction(import_action)
         toolbar.addSeparator()
     
         # Add Tabular button
@@ -130,13 +145,7 @@ class MainWindow(QMainWindow):
         # Add Image button
         toolbar.addAction(self.create_action("Image", self.open_image, "icons/imager.png"))
     
-        # Add Import Files action
-        import_action = QAction("Import Files", self)
-        import_action.setIcon(QIcon("icons/import_file.png"))
-        import_action.triggered.connect(self.study_model.import_files)
-        toolbar.addAction(import_action)
-        toolbar.addSeparator()
-    
+
         # Add the Run button
         self.run_button_action = QAction(QIcon("icons/run.png"), "Run", self)
         self.run_button_action.triggered.connect(self.run_selected_option)
@@ -151,12 +160,12 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "Open Tabular", "This will open the Tabular dialog.")
         # TODO: Replace with the logic to open TableDialog
         # For now, simulate file import
-        self.study_model.import_files()
+        self.import_files()
     
     def open_image(self):
         """Open the image viewer and load the first file in the imported list."""
         # Ensure a module is selected; if not, use 'files' as the default
-        if not self.results['Importer']:
+        if not self.file_list:
             QMessageBox.warning(self, "No Files", "No files available to open in the viewer.")
             return
 
@@ -204,7 +213,6 @@ class MainWindow(QMainWindow):
         # Initialize DataSigner and sign the data
         try:
             data_signer = self.data_signer
-            study_model = self.study_model  # Assuming `self.study_model.data` holds the study data to be signed
             
             signature = data_signer.sign_results(
                 username=self.user_model.username,
@@ -339,7 +347,7 @@ class MainWindow(QMainWindow):
         )
 
         
-        self.results[selected_option] = {key:None for key in self.file_list}
+        self.results[selected_option] = {key:None for key in self.filename}
         
         self.selected_option = selected_option
         self.run_action.setDisabled(False)  # Enable Run action
@@ -380,21 +388,22 @@ class MainWindow(QMainWindow):
         self.processor.update_image()
         
 
-    def open_file_management(self, file_list=None):
+    def open_file_management(self):
         """
         Open the File Management dialog.
     
         Args:
             file_list (list): List of file paths to manage.
         """    
-        if not file_list:
+        if not self.file_list:
             QMessageBox.warning(self, "No Files", "The imported file list is empty.")
             self.logger.warning("Attempted to open File Management dialog with no files.")
             return
     
-        self.file_list = file_list
+        file_list = self.file_list
+        filename = self.filenames
         
-        self.results['Importer'] = {file: None for file in file_list}  # Initialize files dictionary
+        self.results['Importer'] = {file:path for file, path in zip(filename, file_list)}  # Initialize files dictionary
         self.logger.info("File list initialized with %d files.", len(file_list))
     
         # Check if the dialog is already open
@@ -429,18 +438,149 @@ class MainWindow(QMainWindow):
         if not self.file_list:
             self.logger.warning("Attempted to set an invalid index")
             return
-
-        keys = list(self.file_list.keys())
-
         
-        if 0 <= index < len(keys):
-            self.logger.info("Updating file %s", keys[index])
+        if 0 <= index < len(self.file_list):
+            self.logger.info("Updating file %s", self.file_list[index])
             self.current_index = index
         else:
             QMessageBox.warning(None, "Invalid Index", "Index out of range.")
             self.logger.warning("Attempted to set an invalid index")
 
+
+    def create_new_file(self):
+        """Create a new file."""
+        if self.unsaved_changes:
+            reply = QMessageBox.question(
+                self,
+                "Unsaved Changes",
+                "You have unsaved changes. Do you want to save before creating a new file?",
+                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
+            )
     
+            if reply == QMessageBox.Yes:
+                if self.save_file():  # Assuming save_file() returns success status
+                    self.logger.info("Unsaved changes saved before creating a new file.")
+                else:
+                    QMessageBox.critical(self, "Error", "Failed to save changes.")
+                    return
+            elif reply == QMessageBox.Cancel:
+                self.logger.info("New file creation canceled by the user.")
+                return
+    
+        # Reset for new file
+        self.unsaved_changes = False
+        filename = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.file_path = os.path.join(tempfile.gettempdir(), f"{filename}.mapel")
+        self.results = {}
+        self.logger.info("New file created successfully.")
+
+        # Notify the user
+        QMessageBox.information(
+            self,
+            "New File Created",
+            f"A new file has been created: {self.file_path}"
+        )
+
+
+
+
+    def save_as(self):
+        """Save data to a new file."""
+        file_path, _ = QFileDialog.getSaveFileName(None, "Save File As", "", "Mapel Files (*.mapel)")
+        if file_path:
+            if not file_path.endswith(".mapel"):
+                file_path += ".mapel"
+    
+            try:
+                self.file_path = file_path
+                self.save_file()
+                self.unsaved_changes = False
+            except Exception as e:
+                QMessageBox.critical(None, "Error", f"Failed to save file: {e}")
+                
+                
+    def open_file(self):
+        """Open an HDF5 file and load its data."""
+        # Open a file dialog and get the selected file path
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Mapel (*.mapel);;Text Files (*.mapel)")
+
+        if file_path:
+
+            try:
+
+                def load_dict_from_hdf5(h5_group):
+                    data_dict = {}
+                    for key, item in h5_group.items():
+                        if item =="None":
+                            item = None
+                        if isinstance(item, h5py.Group):
+                            data_dict[str(key)] = load_dict_from_hdf5(item)
+                        else:
+                            data_dict[str(key)] = item[()]
+                    return data_dict
+            
+                # Load nested dictionary back from HDF5 file
+                with h5py.File(file_path, 'r') as h5f:
+                    self.results = load_dict_from_hdf5(h5f)
+
+                self.file_path = file_path
+
+                # Update file path and file list
+                self.file_list = list(self.results.get("Importer", {}).values())
+                self.filenames = list(self.results.get("Importer", {}).keys())
+
+                print(self.filenames)
+                QMessageBox.information(self, "File Opened", f"Successfully opened file: {file_path}")
+                self.open_file_management()
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Failed to open file: {e}")
+                
+    def save_file(self):
+        """Save the current data to the file path."""
+        if self.file_path:
+            # Function to recursively save nested dictionary to HDF5
+            def save_dict_to_hdf5(data_dict, h5_group):
+                for key, value in data_dict.items():
+                    if value is None:
+                        h5_group.create_dataset(str(key), data="None")
+                    elif isinstance(value, dict):
+                        # If the value is a dictionary, create a group
+                        subgroup = h5_group.create_group(str(key))
+                        save_dict_to_hdf5(value, subgroup)
+                    else:
+                        # Otherwise, save the array
+                        h5_group.create_dataset(str(key), data=value)
+            try:
+                
+
+                with h5py.File(self.file_path, 'w') as h5f:
+                    save_dict_to_hdf5(self.results, h5f)
+
+                self.unsaved_changes = False
+                QMessageBox.information(self, "File Saved", f"File successfully saved to: {self.file_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "Save Error", f"An error occurred while saving the file: {e}")
+        else:
+            self.show_save_file_dialog()
+
+
+    def import_files(self):
+        """Import multiple files."""
+        file_filters = "Images (*.png *.jpg *.jpeg *.bmp *.gif);;Text Files (*.txt *.csv);;All Files (*.*)"
+        files, _ = QFileDialog.getOpenFileNames(None, "Import Files", "", file_filters)
+        if files:
+            directory = os.path.dirname(files[0]) if files else None
+            
+            # Extract filenames only
+            filenames = [os.path.basename(file)[:-4] for file in files]
+            
+            # Store files for further processing
+            self.file_list = files  # Full file[:-3] paths
+            self.results['metadata'] = {'directory':directory, 'files':filenames}
+            self.directory = directory
+            self.filenames = filenames
+            self.open_file_management()
+
     def get_audit_trail(self):
         """
         Retrieve and parse the audit trail log file.
@@ -490,11 +630,7 @@ class MainWindow(QMainWindow):
         
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load audit trail: {e}")
-    
-        
-    
 
-        
     def closeEvent(self, event):
         """
         Handle unsaved changes, prompt the user, and close all open windows.
@@ -509,7 +645,7 @@ class MainWindow(QMainWindow):
                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel
                 )
                 if reply == QMessageBox.Yes:
-                    self.study_model.save_file()
+                    self.save_file()
                     self.logger.info("Unsaved changes saved before closing.")
                     event.accept()
                 elif reply == QMessageBox.No:

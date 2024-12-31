@@ -10,13 +10,15 @@ import os
 
 
 class ImageViewer(QMainWindow):
-    def __init__(self, image_paths=None, index=0):
+    def __init__(self, image_paths=None, title = "Image Viewer", index=0):
         super().__init__()
-        self.image_paths = image_paths #if image_paths else []
+        self.image_paths = {key:None for key in list(image_paths.keys())} 
+        self.image_files = list(image_paths.values())
         self.current_index = index
-
+        self.title = title
+        
         # Initialize UI
-        self.setWindowTitle("Image Viewer")
+        self.setWindowTitle(self.title)
         self.resize(600, 450)
 
         # Image display
@@ -50,18 +52,22 @@ class ImageViewer(QMainWindow):
             QMessageBox.information(self, "No Images", "No images to display.")
             return
     
-        # Get the current filename and check if it exists in the dictionary
+
         filenames = list(self.image_paths.keys())
+        filepaths = self.image_files
         if self.current_index < 0 or self.current_index >= len(filenames):
             QMessageBox.information(self, "No Images", "Invalid image index.")
             return
     
         current_filename = filenames[self.current_index]
-    
+        current_path = filepaths[self.current_index].decode('utf-8')
+
+        print(current_path)
+
         # Load the image if not already loaded
         if self.image_paths[current_filename] is None:
             try:
-                self.image_paths[current_filename] = self.read_image(current_filename)
+                self.image_paths[current_filename] = self.read_image(current_path)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load image '{current_filename}': {e}")
                 return

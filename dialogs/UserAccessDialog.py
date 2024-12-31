@@ -1,88 +1,114 @@
 from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QComboBox, QPushButton, QMessageBox
+    QDialog, QGridLayout, QHBoxLayout, QLabel, QLineEdit, QComboBox, QPushButton, QMessageBox, QApplication, QTextEdit
 )
 from services.SecurityService import SecurityService
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QTextOption
 
 
 class UserAccessDialog(QDialog):
     def __init__(self, user_model, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("User Access Management")
-        #self.resize(400, 500)
+        self.setWindowTitle("User Management")
+       # self.resize(500, 600)
 
         self.user_model = user_model
         self.is_admin = self.user_model.get_user_credentials()["admin"]
 
         # Main layout
-        main_layout = QVBoxLayout(self)
+        main_layout = QGridLayout(self)
+
+        # Row index for grid layout
+        row = 0
 
         # User Selection Section
-        user_layout = QVBoxLayout()
         user_label = QLabel("Select User:")
         self.user_dropdown = QComboBox(self)
         self.populate_user_dropdown()
-        user_layout.addWidget(user_label)
-        user_layout.addWidget(self.user_dropdown)
-        main_layout.addLayout(user_layout)
+        main_layout.addWidget(user_label, row, 0)
+        main_layout.addWidget(self.user_dropdown, row, 1, 1, 2)  # Span across two columns
+        row += 1
 
         # Current Password Section (Only for standard users)
         if not self.is_admin:
-            current_password_layout = QVBoxLayout()
             current_password_label = QLabel("Current Password:")
             self.current_password_input = QLineEdit(self)
             self.current_password_input.setEchoMode(QLineEdit.Password)
-            current_password_layout.addWidget(current_password_label)
-            current_password_layout.addWidget(self.current_password_input)
-            main_layout.addLayout(current_password_layout)
+            main_layout.addWidget(current_password_label, row, 0)
+            main_layout.addWidget(self.current_password_input, row, 1, 1, 2)
+            row += 1
 
         # New Password Section
-        password_layout = QVBoxLayout()
         password_label = QLabel("New Password:")
         self.password_input = QLineEdit(self)
         self.password_input.setEchoMode(QLineEdit.Password)
-
         confirm_password_label = QLabel("Confirm Password:")
         self.confirm_password_input = QLineEdit(self)
         self.confirm_password_input.setEchoMode(QLineEdit.Password)
 
-        password_layout.addWidget(password_label)
-        password_layout.addWidget(self.password_input)
-        password_layout.addWidget(confirm_password_label)
-        password_layout.addWidget(self.confirm_password_input)
-        main_layout.addLayout(password_layout)
+        main_layout.addWidget(password_label, row, 0)
+        main_layout.addWidget(self.password_input, row, 1, 1, 2)
+        row += 1
+        main_layout.addWidget(confirm_password_label, row, 0)
+        main_layout.addWidget(self.confirm_password_input, row, 1, 1, 2)
+        row += 1
 
         # Role Selection Section (Admins only)
-        role_layout = QVBoxLayout()
         role_label = QLabel("Role:")
-        self.role_dropdown = QComboBox(self)  # Ensure role_dropdown is always initialized
+        self.role_dropdown = QComboBox(self)
         if self.is_admin:
             self.role_dropdown.addItems(["Standard", "Admin"])
         else:
-            self.role_dropdown.setEnabled(False)  # Disable dropdown for standard users
+            self.role_dropdown.addItems(["Standard"])
+            self.role_dropdown.setEnabled(False)
 
-        role_layout.addWidget(role_label)
-        role_layout.addWidget(self.role_dropdown)
-        main_layout.addLayout(role_layout)
+        main_layout.addWidget(role_label, row, 0)
+        main_layout.addWidget(self.role_dropdown, row, 1, 1, 2)
+        row += 1
+
+        # Public Key Section
+        public_key_label = QLabel("Public Key:")
+        self.public_key_display = QTextEdit(self)
+        self.public_key_display.setReadOnly(True)  # Ensure the text is not editable
+        self.public_key_display.setWordWrapMode(QTextOption.WrapAtWordBoundaryOrAnywhere)  # Enable word wrapping
+        self.public_key_display.setFixedHeight(80)  # Adjust height to show approximately four lines
+        copy_key_button = QPushButton("Copy Public Key")
+        copy_key_button.clicked.connect(self.copy_public_key_to_clipboard)
+
+        main_layout.addWidget(public_key_label, row, 0)
+        main_layout.addWidget(self.public_key_display, row, 1)
+        main_layout.addWidget(copy_key_button, row, 2)
+        row += 1
 
         # Buttons Section
-        button_layout = QHBoxLayout()
         save_button = QPushButton("Save Changes", self)
         save_button.clicked.connect(self.save_changes)
-        button_layout.addWidget(save_button)
 
-        if self.is_admin:
-            delete_button = QPushButton("Delete User", self)
-            delete_button.clicked.connect(self.delete_user)
-            button_layout.addWidget(delete_button)
+        delete_button = QPushButton("Delete User", self)
+        delete_button.clicked.connect(self.delete_user)
+        delete_button.setEnabled(self.is_admin)
 
         cancel_button = QPushButton("Cancel", self)
-        cancel_button.clicked.connect(self.reject)  # Close the dialog without saving
-        button_layout.addWidget(cancel_button)
+        cancel_button.clicked.connect(self.reject)
 
-        main_layout.addLayout(button_layout)
+        main_layout.addWidget(save_button, row, 0)
+        main_layout.addWidget(delete_button, row, 1)
+        main_layout.addWidget(cancel_button, row, 2)
 
-        # Prepopulate the role dropdown based on the selected user
-        self.user_dropdown.currentIndexChanged.connect(self.update_role_dropdown)
+        # Prepopulate the role dropdown and public key based on the selected user
+        self.user_dropdown.currentIndexChanged.connect(self.update_user_info)
+
+        # Initial population of user info
+        self.update_user_info()
+
+    def copy_public_key_to_clipboard(self):
+        public_key = self.public_key_display.text
+        if public_key:
+            QApplication.clipboard().setText(public_key)
+            QMessageBox.information(self, "Success", "Public key copied to clipboard.")
+        else:
+            QMessageBox.warning(self, "Error", "No public key available to copy.")
+
 
     def populate_user_dropdown(self):
         """Populate the user dropdown with all users and select the current user."""
@@ -130,7 +156,7 @@ class UserAccessDialog(QDialog):
 
         # Validate and update password
         if new_password:
-            validation_error = self.validate_password(new_password)
+            validation_error = self.SecurityServices.validate_password(new_password)
             if validation_error:
                 QMessageBox.warning(self, "Error", validation_error)
                 return
@@ -190,23 +216,21 @@ class UserAccessDialog(QDialog):
                 self.populate_user_dropdown()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to delete user: {e}")
+                
+                
+    def update_user_info(self):
+        """Update the role dropdown and public key based on the selected user."""
+        selected_user = self.user_dropdown.currentData()
+        if selected_user:
+            user_data = self.user_model.get_user_credentials()
+            if user_data:
+                # Update role dropdown
+                current_role = "Admin" if user_data["admin"] else "Standard"
+                self.role_dropdown.setCurrentText(current_role)
+                self.role_dropdown.setEnabled(self.is_admin and selected_user != self.user_model.username)
 
-
-
-    def validate_password(self, password):
-        """Validate the password based on defined criteria."""
-        if len(password) < 8:
-            return "Password must be at least 8 characters long."
-        if not any(char.isdigit() for char in password):
-            return "Password must include at least one number."
-        if not any(char.isupper() for char in password):
-            return "Password must include at least one uppercase letter."
-        if not any(char.islower() for char in password):
-            return "Password must include at least one lowercase letter."
-        if not any(char in "!@#$%^&*()-_=+[]{}|;:'\",.<>?/`~" for char in password):
-            return "Password must include at least one special character."
-        return None
-
- 
+                # Update public key display
+                public_key = user_data.get("public_key", "N/A")  # Fetch public key securely
+                self.public_key_display.setText(public_key)
 
 
