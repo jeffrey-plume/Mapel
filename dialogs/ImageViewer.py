@@ -36,23 +36,22 @@ class ImageViewer(QMainWindow):
 
         # Display the first image if available
         if self.image_paths:
-            self.update_image()
+            self.compute()
 
     def set_current_index(self, index):
         """Slot to update the current index and refresh the image."""
         if 0 <= index < len(self.image_paths):
             self.current_index = index
-            self.update_image()
+            self.compute()
         else:
             QMessageBox.warning(self, "Invalid Index", "Index out of range.")
 
-    def update_image(self):
+    def compute(self):
         """Display the current image."""
         if not self.image_paths:
             QMessageBox.information(self, "No Images", "No images to display.")
             return
     
-
         filenames = list(self.image_paths.keys())
         filepaths = self.image_files
         if self.current_index < 0 or self.current_index >= len(filenames):
@@ -60,35 +59,35 @@ class ImageViewer(QMainWindow):
             return
     
         current_filename = filenames[self.current_index]
-        current_path = filepaths[self.current_index].decode('utf-8')
-
-        print(current_path)
-
+    
         # Load the image if not already loaded
         if self.image_paths[current_filename] is None:
             try:
+                current_path = os.path.normpath(filepaths[self.current_index].strip('"'))
                 self.image_paths[current_filename] = self.read_image(current_path)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load image '{current_filename}': {e}")
                 return
-
-        self.display_image()
     
-    def display_image(self, title="Image"):
-        """Display the provided image."""
+        # Update the window title to include the current filename
+        self.setWindowTitle(f"{self.title} - {current_filename}")
+    
+        self.display_image()
 
+    
+    def display_image(self):
+        """Display the current image."""
         filenames = list(self.image_paths.keys())
         if self.current_index < 0 or self.current_index >= len(filenames):
             QMessageBox.information(self, "No Images", "Invalid image index.")
             return
     
         current_filename = filenames[self.current_index]
-
         img = self.image_paths[current_filename]
-        
-
+    
         if img is not None:
-            self.setWindowTitle(title)
+            # Update the title with the current image name
+            self.setWindowTitle(f"{self.title} - {current_filename}")
             self.figure.clear()
             ax = self.figure.add_subplot(111)
             ax.imshow(img, cmap='gray')
@@ -96,6 +95,7 @@ class ImageViewer(QMainWindow):
             self.canvas.draw()
         else:
             QMessageBox.warning(self, "Display Error", "The image could not be displayed.")
+    
 
     def read_image(self, image_path):
         """Read and validate an image."""

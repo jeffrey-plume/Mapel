@@ -10,7 +10,6 @@ from models.user_model import UserModel
 from datetime import datetime
 from services.LoggingServices import setup_logger, UserFilter
 
-
 def parse_args():
     """Parse command-line arguments if needed."""
     import argparse
@@ -30,16 +29,10 @@ def initialize_database(db_path):
         raise
 
 
-def show_fatal_error(message):
-    """Display a fatal error message to the user."""
-    QMessageBox.critical(None, "Fatal Error", message)
-    sys.exit(1)
-
-
 def main():
     args = parse_args()
 
-    logger = setup_logger(name=__name__, username="System", filename="audit_trail.log")
+    logger = setup_logger(name=__name__, username="System")
 
     try:
         logger.info("Starting the application.")
@@ -48,7 +41,8 @@ def main():
         # Initialize database and services
         db_path = args.db_path
         db_connection = initialize_database(db_path)
-        user_model = UserModel(db_connection)
+        user_model = UserModel(db_connection, logger = logger)
+        user_model.ensure_admin_exists()
 
         logger.info("Services initialized successfully.")
 
@@ -76,7 +70,8 @@ def main():
         error_message = f"An unexpected error occurred: {e}"
         logger.error(error_message)
         logger.debug(traceback.format_exc())
-        show_fatal_error(error_message)
+        QMessageBox.critical(None, "Fatal Error", error_message)
+        sys.exit(1)
 
     finally:
         # Ensure the database connection is closed

@@ -4,6 +4,7 @@ import json
 import logging
 import os
 from datetime import datetime
+import tempfile
 
 class UserFormatter(logging.Formatter):
     def format(self, record):
@@ -20,7 +21,7 @@ class UserFormatter(logging.Formatter):
             log_entry["message"] = str(record.getMessage())
             return json.dumps(log_entry)
 
-def setup_logger(name, username="System", filename=f'{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'):
+def setup_logger(name, username="System", filename=datetime.now().strftime('%Y%m%d_%H%M%S')):
     
     logger = logging.getLogger(name)
     if not logger.hasHandlers():
@@ -37,6 +38,7 @@ def setup_logger(name, username="System", filename=f'{datetime.now().strftime("%
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         logger.setLevel(logging.DEBUG)
+    logger.log_path = log_path
 
     return logger
 

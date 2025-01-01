@@ -146,17 +146,17 @@ class UserAccessDialog(QDialog):
         selected_user = self.user_dropdown.currentData()
         new_password = self.password_input.text().strip()
         confirm_password = self.confirm_password_input.text().strip()
-
+        current_user = self.user_model.get_user_credentials()["username"]
         # For standard users, verify their current password
         if not self.is_admin:
             current_password = self.current_password_input.text().strip()
-            if not self.user_model.verify_credentials(current_password):
+            if not self.user_model.verify_credentials(current_user, current_password):
                 QMessageBox.warning(self, "Error", "Current password is incorrect.")
                 return
 
         # Validate and update password
         if new_password:
-            validation_error = self.SecurityServices.validate_password(new_password)
+            validation_error = SecurityService.validate_password(new_password)
             if validation_error:
                 QMessageBox.warning(self, "Error", validation_error)
                 return

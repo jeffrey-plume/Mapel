@@ -1,7 +1,0 @@
-{"timestamp": "2024-12-30 18:35:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
-{"timestamp": "2024-12-30 18:35:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
-{"timestamp": "2024-12-30 18:35:32", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
-{"timestamp": "2024-12-30 18:35:42", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
-{"timestamp": "2024-12-30 18:35:42", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
-{"timestamp": "2024-12-30 18:36:02", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Updating file C:/Users/Lenovo/OneDrive/Documents/Images/2daa27a6df.png"}
-{"timestamp": "2024-12-30 18:36:03", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Updating file C:/Users/Lenovo/OneDrive/Documents/Images/7fabcfe23f.png"}

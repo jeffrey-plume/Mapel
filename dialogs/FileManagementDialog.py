@@ -7,7 +7,7 @@ class FileManagementDialog(QDialog):
     def __init__(self, file_list=None, parent=None):
         super().__init__(parent)
         self.setWindowTitle("File Manager")
-        self.file_list = list(file_list.keys())
+        self.file_list = list(file_list.values())
         self.current_index = 0  # Track the currently displayed file
 
         # Layout

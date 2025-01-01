@@ -5,11 +5,15 @@ import logging
 from typing import Tuple, Optional, Dict
 import pandas as pd
 import sqlite3
+import secrets
+import string
+from PyQt5.QtWidgets import QMessageBox
+
 
 class UserModel:
-    def __init__(self,  conn = sqlite3.connect('user_credentials.db')):
+    def __init__(self,  conn = sqlite3.connect('user_credentials.db'), logger= None):
         self.conn = conn
-        self.logger = logging.getLogger(__name__)
+        self.logger = logger or logging.getLogger(__name__)
         self.failed_attempts = {}  # {username: {"count": int, "lockout_end": datetime}}
         self.max_attempts = 3
         self.lockout_duration = 600  # Lockout duration in seconds
@@ -204,7 +208,13 @@ class UserModel:
         try:
             credentials = self._generate_secure_credentials()
             self.register_user(credentials["username"], credentials["password"], is_admin=True)
-            self.logger.info(f"Default admin created: {credentials['username']}")
+            
+            # Log both username and plaintext password (temporary credentials)
+            self.logger.info(
+                f"Temporary default admin credentials created: Username={credentials['username']}, Password={credentials['password']}"
+            )
+            
+            # Notify the user through a message box
             QMessageBox.information(
                 None,
                 "First Time Login",
@@ -215,7 +225,7 @@ class UserModel:
         except Exception as e:
             self.logger.error(f"Failed to create default admin user: {e}")
             raise
-    
+
     @staticmethod
     def _generate_secure_credentials() -> Dict[str, str]:
         """Generate secure credentials."""
@@ -224,12 +234,11 @@ class UserModel:
         password = ''.join(secrets.choice(password_characters) for _ in range(16))
         return {"username": username, "password": password}
 
-
-
-    def register_user(self, password: str, is_admin: bool = False):
+    
+    def register_user(self, username: str, password: str, is_admin: bool = False):
         """Register a new user."""
         if self.get_user_credentials():
-            raise ValueError(f"User '{self.username}' already exists.")
+            raise ValueError(f"User '{username}' already exists.")
     
         try:
             salt = SecurityService.generate_salt()
@@ -243,21 +252,22 @@ class UserModel:
                 VALUES (?, ?, ?, ?, ?, ?)
             '''
             self._execute_query(query, (
-                self.username,
+                username,
                 password_hash,
                 salt,
                 encrypted_private_key,
                 serialized_public_key,
                 int(is_admin),
             ))
-            self.logger.info(f"User '{self.username}' registered successfully.")
+            self.logger.info(f"User '{username}' registered successfully.")
         except sqlite3.Error as e:
-            self.logger.error(f"Database error during registration of '{self.username}': {str(e)}")
+            self.logger.error(f"Database error during registration of '{username}': {str(e)}")
             raise
         except Exception as e:
-            self.logger.error(f"Unexpected error during registration of '{self.username}': {str(e)}")
-            raise 
+            self.logger.error(f"Unexpected error during registration of '{username}': {str(e)}")
+            raise
     
+        
     
         
 
