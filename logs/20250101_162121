@@ -1,0 +1,16 @@
+{"timestamp": "2025-01-01 16:21:21", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-01 16:21:21", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-01 16:21:21", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-01 16:21:21", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-01 16:21:26", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "[AUDIT] 2025-01-01 16:21:26.950518 - User: jmp637, Action: Login failed for user 'jmp637'"}
+{"timestamp": "2025-01-01 16:21:32", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "[AUDIT] 2025-01-01 16:21:32.859202 - User: jmp637, Action: Login failed for user 'jmp637'"}
+{"timestamp": "2025-01-01 16:21:40", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-01 16:21:51", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-01 16:21:51", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-01 16:22:13", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 1/14: C:/Users/Lenovo/OneDrive/Documents/Images\\0a55e7c93f.png"}
+{"timestamp": "2025-01-01 16:22:18", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "Error during batch run: 'list' object has no attribute 'keys'"}
+{"timestamp": "2025-01-01 16:29:45", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-01 16:29:45", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: File Manager"}
+{"timestamp": "2025-01-01 16:29:45", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-01 16:29:45", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-01 16:29:45", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

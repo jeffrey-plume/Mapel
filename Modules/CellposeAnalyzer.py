@@ -12,25 +12,38 @@ from dialogs.ImageViewer import ImageViewer
 
 
 
+
+from PyQt5.QtWidgets import (
+    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget,
+    QLabel, QLineEdit, QComboBox, QMessageBox, QFileDialog, QProgressBar
+)
+from PyQt5.QtCore import Qt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from cellpose import io, models, plot
+import os
+import sys
+from dialogs.ImageViewer import ImageViewer
+
+
+
 class CellposeAnalyzer(ImageViewer):
-    def __init__(self, image_paths=None, index=0, title = 'CellposeAnalyzer', model_type="cyto", diameter=25, gpu=True):
+    def __init__(self, image_paths=None, index=0, diameter=25):
         """
         Subclass of ImageViewer that integrates Cellpose analysis.
         """
+        self.diameter = diameter
+        self.model = models.Cellpose(model_type='cyto3')
         # Initialize the parent class (ImageViewer)
-        super().__init__(image_paths=image_paths, title = title, index=index)
+        super().__init__(image_paths=image_paths, index=index)
+
+        self.image_files = image_paths
 
         # Additional attributes specific to CellposeAnalyzer
-        self.model_type = model_type
-        self.diameter = diameter
-        self.gpu = gpu
-        self.segmented_images = {}
-        self.title = title
         self.current_index = index
-        self.model = models.CellposeModel(model_type=model_type, gpu=gpu)
         self.image_paths = {key:None for key in list(image_paths.keys())} 
         self.image_files = list(image_paths.values())
-
+        
 
     def compute(self):
         """Process the current image using Cellpose and display the segmentation result."""
@@ -59,18 +72,20 @@ class CellposeAnalyzer(ImageViewer):
         img = self.image_paths[current_filename]
         try:
             masks, flows, styles = models.CellposeModel(model_type='cyto3').eval(img,
-                            diameter=25, channels=[1,2])
+                            diameter=self.diameter, channels=[1,2])
             mask_RGB = plot.mask_overlay(img, masks)
             self.image_paths[current_filename] = mask_RGB
 
             
-            self.setWindowTitle(f"{self.title} - {current_filename}")
+            self.setWindowTitle(f"CellposeAnalyzer- {current_filename}")
         
             self.display_image()
             
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to process image: {e}")
             return
+
+
 
 
 

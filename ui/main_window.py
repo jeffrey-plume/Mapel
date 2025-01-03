@@ -26,7 +26,7 @@ from services.LoggingServices import setup_logger
 from services.FileManager import FileManager
 from models.user_model import UserModel
 from utils.file_utils import load_module
-
+from dialogs.ControllerDialog import ControllerDialog
 
 
 
@@ -294,46 +294,102 @@ class MainWindow(QMainWindow):
 
     
     def run_selected_option(self):
-        self.processor.compute()
-        self.file_manager.results[self.selected_option] = self.processor.image_paths
-        self.processor.update_image()
+        """Run processing on all files in the selected module with a progress bar."""
+        if not self.selected_option:
+            QMessageBox.warning(self, "No Module Selected", "Please select a module before running Batch Run.")
+            return
+    
+        if not self.file_manager.results[self.selected_option]:
+            QMessageBox.warning(self, "No Files", "No files available to process for the selected module.")
+            return
+    
+        file_list = self.file_manager.results['Importer']
+        if not file_list:
+            QMessageBox.warning(self, "No Files", "The file list is empty.")
+            return
+    
+        # Initialize progress dialog
+        progress_dialog = QProgressDialog("Processing files...", "Cancel", 0, len(file_list), self)
+        progress_dialog.setWindowTitle("Batch Processing")
+        progress_dialog.setWindowModality(Qt.WindowModal)
+        progress_dialog.setMinimumWidth(300)
+        
+        progress_dialog.show()
+    
+        try:
+            processor_class = self.loaded_modules[self.selected_option]
+            processor = self.open_windows[len(self.open_windows)-1]
 
+            for idx in range(len(file_list)):
+                if progress_dialog.wasCanceled():
+                    self.logger.info("Batch processing canceled by the user.")
+                    break
+
+                processor.current_index = idx
+                self.logger.info(f"Processing file {idx + 1}/{len(file_list)}")
+                
+                # Instantiate processor and process file
+                processor.compute()
+    
+                # Update progress dialog
+                progress_dialog.setValue(idx + 1)
+                QApplication.processEvents()  # Keep UI responsive
+
+            self.file_manager.results[self.selected_option] = processor.image_paths
+
+            if progress_dialog.wasCanceled():
+                QMessageBox.warning(self, "Batch Run Canceled", "Batch processing was canceled.")
+            else:
+                QMessageBox.information(self, "Batch Run Complete", f"Batch run completed successfully for {len(file_list)} files.")
+                self.logger.info("Batch run completed successfully.")
+        except Exception as e:
+            QMessageBox.critical(self, "Batch Run Failed", f"An error occurred during batch processing: {e}")
+            self.logger.error("Error during batch run: %s", str(e))
+        finally:
+            progress_dialog.close()
        
     def open_module_window(self):
         """Process the current image using the selected module and display the results."""
         if not self.file_manager.results[self.selected_option] or not self.loaded_modules[self.selected_option]:
             QMessageBox.information(self, "No Images or Module", "No images or module to process.")
             return
-
+    
         if self.selected_option:
             selected_option = self.selected_option
         # Ensure the selected option exists in results
         if selected_option not in self.file_manager.results:
             self.file_manager.results[selected_option] = self.file_manager.results['Importer']
-
+    
         file_list = self.file_manager.results[self.selected_option]
-
-
+    
         if not (0 <= self.current_index < len(file_list)):
             QMessageBox.warning(self, "Invalid Index", "Current index is out of range.")
             return
-
+    
         try:
             # Instantiate the processor and process the image
             processor_class = self.loaded_modules[self.selected_option]
             processor = processor_class(image_paths=file_list, index=self.current_index)
-            
+    
             if self.file_management_dialog:
                 self.file_management_dialog.current_index_changed.connect(processor.set_current_index)
-
+    
             # Keep a reference to the viewer window to prevent garbage collection
             self.open_windows.append(processor)
+
             processor.show()
-            
+    
+            # Open ControllerDialog if the selected option is not 'Imager'
+            if self.selected_option != 'Imager':
+                control = ControllerDialog(processor)
+                control.param_changed.connect(processor.compute)
+
+                control.show()
+                self.open_windows.append(control)
+    
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Processing failed for image  {e}")
-            return
-        
+            QMessageBox.critical(self, "Error", f"Processing failed for image: {e}")
+
 
     def open_file_management(self):
         """

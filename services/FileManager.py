@@ -239,3 +239,4 @@ class FileManager(QObject):
         ]
         return table_data, headers
 
+

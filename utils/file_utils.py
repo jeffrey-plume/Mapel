@@ -3,16 +3,19 @@ import importlib.util
 import h5py 
 import json
 
+import importlib.util
+import os
+
 def load_module(module_name, module_dir):
     """
-    Dynamically load a module and return the class.
+    Dynamically load a module from a directory.
 
     Args:
-        module_name (str): The name of the module to load.
-        module_dir (str): Path to the directory containing modules.
+        module_name (str): Name of the module to load.
+        module_dir (str): Path to the directory containing the module.
 
     Returns:
-        class: The loaded module class.
+        module: Loaded module class.
     """
     module_path = os.path.join(module_dir, f"{module_name}.py")
     if not os.path.exists(module_path):
@@ -23,9 +26,9 @@ def load_module(module_name, module_dir):
     spec.loader.exec_module(module)
 
     if hasattr(module, module_name):
-        return getattr(module, module_name)  # Return the loaded class
-    else:
-        raise ImportError(f"Class '{module_name}' not found in module '{module_name}'")
+        return getattr(module, module_name)
+    raise ImportError(f"Class '{module_name}' not found in module '{module_name}'")
+
 
 
 def save_dict_to_hdf5(data_dict, h5_group):
@@ -48,9 +51,29 @@ def load_dict_from_hdf5(h5_group):
             if isinstance(value, bytes):
                 value = value.decode('utf-8')
             data_dict[key] = None if value == "None" else value.strip('"').replace('\\\\', '\\')
-            print(f"Key: {key}, Value: {value}")  # Debugging output
 
     return data_dict
 
 
+import os
+from dialogs.ImageViewer import ImageViewer
+
+def load_module_options():
+    """Load available modules from the 'Modules' folder."""
+    module_dir = os.path("Modules")
+    if not os.path.exists(module_dir):
+        return
+
+    loaded_modules = {}
+
+    loaded_modules['Imager'] = ImageViewer
+    for file_name in os.listdir(module_dir):
+        if file_name.endswith(".py") and not file_name.startswith("__"):
+            module_name = file_name[:-3]
+            try:
+                loaded_modules[module_name] = load_module(module_name, module_dir)
+            except Exception as e:
+                return
+
+    return loaded_modules
 

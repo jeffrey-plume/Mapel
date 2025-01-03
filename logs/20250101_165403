@@ -1,0 +1,33 @@
+{"timestamp": "2025-01-01 16:54:03", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-01 16:54:03", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-01 16:54:03", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-01 16:54:03", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-01 16:54:08", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-01 16:54:21", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-01 16:54:21", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-01 16:54:47", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 1/14"}
+{"timestamp": "2025-01-01 16:54:55", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 2/14"}
+{"timestamp": "2025-01-01 16:55:06", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 3/14"}
+{"timestamp": "2025-01-01 16:55:13", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 4/14"}
+{"timestamp": "2025-01-01 16:55:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 5/14"}
+{"timestamp": "2025-01-01 16:55:32", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 6/14"}
+{"timestamp": "2025-01-01 16:55:39", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 7/14"}
+{"timestamp": "2025-01-01 16:55:49", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 8/14"}
+{"timestamp": "2025-01-01 16:55:56", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 9/14"}
+{"timestamp": "2025-01-01 16:56:02", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 10/14"}
+{"timestamp": "2025-01-01 16:56:11", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 11/14"}
+{"timestamp": "2025-01-01 16:56:17", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 12/14"}
+{"timestamp": "2025-01-01 16:56:25", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 13/14"}
+{"timestamp": "2025-01-01 16:56:32", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 14/14"}
+{"timestamp": "2025-01-01 17:06:31", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Batch run completed successfully."}
+{"timestamp": "2025-01-01 17:06:39", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Updating file C:/Users/Lenovo/OneDrive/Documents/Images\\15a3ba1c51.png"}
+{"timestamp": "2025-01-01 17:06:52", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Updating file C:/Users/Lenovo/OneDrive/Documents/Images\\207bb15702.png"}
+{"timestamp": "2025-01-01 17:08:05", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Updating file C:/Users/Lenovo/OneDrive/Documents/Images\\226dc58f03.png"}
+{"timestamp": "2025-01-01 17:08:34", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Attempting to save file: C:\\Users\\Lenovo\\OneDrive\\Documents\\Desktop\\mapel1.mapel"}
+{"timestamp": "2025-01-01 17:08:38", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "An error occurred while saving the file: 'str' object has no attribute 'extend'\nTraceback (most recent call last):\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Shiva\\services\\FileManager.py\", line 142, in save_file\n    self.results['Audit_Trail'].extend(new_audit)\nAttributeError: 'str' object has no attribute 'extend'\n"}
+{"timestamp": "2025-01-01 17:08:46", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-01 17:08:46", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: File Manager"}
+{"timestamp": "2025-01-01 17:08:46", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: CellposeAnalyzer - 226dc58f03"}
+{"timestamp": "2025-01-01 17:08:46", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-01 17:08:46", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-01 17:08:46", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

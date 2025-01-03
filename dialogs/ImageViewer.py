@@ -10,15 +10,14 @@ import os
 
 
 class ImageViewer(QMainWindow):
-    def __init__(self, image_paths=None, title = "Image Viewer", index=0):
+    def __init__(self, image_paths=None, index=0):
         super().__init__()
         self.image_paths = {key:None for key in list(image_paths.keys())} 
         self.image_files = list(image_paths.values())
         self.current_index = index
-        self.title = title
         
         # Initialize UI
-        self.setWindowTitle(self.title)
+        self.setWindowTitle('Image Viewer')
         self.resize(600, 450)
 
         # Image display
@@ -70,7 +69,7 @@ class ImageViewer(QMainWindow):
                 return
     
         # Update the window title to include the current filename
-        self.setWindowTitle(f"{self.title} - {current_filename}")
+        self.setWindowTitle(f"Image Viewer - {current_filename}")
     
         self.display_image()
 
@@ -87,7 +86,7 @@ class ImageViewer(QMainWindow):
     
         if img is not None:
             # Update the title with the current image name
-            self.setWindowTitle(f"{self.title} - {current_filename}")
+            self.setWindowTitle(f"Image Viewer - {current_filename}")
             self.figure.clear()
             ax = self.figure.add_subplot(111)
             ax.imshow(img, cmap='gray')
@@ -104,4 +103,3 @@ class ImageViewer(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to load image: {e}")
             return None
-

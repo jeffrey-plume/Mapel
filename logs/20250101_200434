@@ -1,0 +1,13 @@
+{"timestamp": "2025-01-01 20:04:34", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-01 20:04:34", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-01 20:04:34", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-01 20:04:34", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-01 20:04:40", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-01 20:04:49", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-01 20:04:49", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-01 20:04:49", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-01 20:05:03", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "Error loading file: 'Importer'\nTraceback (most recent call last):\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Shiva\\services\\FileManager.py\", line 81, in open_file\n    print(self.results['Importer'])\nKeyError: 'Importer'\n"}
+{"timestamp": "2025-01-01 20:05:07", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-01 20:05:07", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-01 20:05:07", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-01 20:05:07", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}
