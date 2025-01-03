@@ -2,6 +2,7 @@ import os
 import importlib.util
 import h5py 
 import json
+import numpy as np
 
 import importlib.util
 import os
@@ -35,6 +36,8 @@ def save_dict_to_hdf5(data_dict, h5_group):
     for key, value in data_dict.items():
         if value is None:
             h5_group.create_dataset(str(key), data="None")
+        elif isinstance(value, np.ndarray):
+            h5_group.create_dataset(str(key), data=value)
         elif isinstance(value, dict):
             subgroup = h5_group.create_group(str(key))
             save_dict_to_hdf5(value, subgroup)

@@ -1,0 +1,13 @@
+{"timestamp": "2025-01-02 21:47:56", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-02 21:47:56", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-02 21:47:56", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-02 21:47:56", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-02 21:48:02", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-02 21:48:12", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-02 21:48:12", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-02 21:48:12", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-02 21:49:50", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 1/14"}
+{"timestamp": "2025-01-02 21:50:00", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "Error during batch run: name 'QApplication' is not defined"}
+{"timestamp": "2025-01-02 21:50:18", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-02 21:50:18", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "Error while closing windows: 'MainWindow' object has no attribute 'open_window'"}
+{"timestamp": "2025-01-02 21:50:31", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}

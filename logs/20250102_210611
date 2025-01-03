@@ -1,0 +1,15 @@
+{"timestamp": "2025-01-02 21:06:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-02 21:06:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-02 21:06:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-02 21:06:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-02 21:06:16", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-02 21:06:26", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-02 21:06:26", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-02 21:06:26", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-02 21:06:42", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "Error in open_module_window: disconnect() failed between 'param_changed' and all its connections"}
+{"timestamp": "2025-01-02 21:06:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-02 21:06:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: File Manager"}
+{"timestamp": "2025-01-02 21:06:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: Image Viewer"}
+{"timestamp": "2025-01-02 21:06:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-02 21:06:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-02 21:06:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

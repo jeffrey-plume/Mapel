@@ -6,7 +6,7 @@ import logging
 from PyQt5.QtCore import QObject, pyqtSignal
 from utils.file_utils import save_dict_to_hdf5, load_dict_from_hdf5
 import h5py 
-
+import numpy as np
 from PyQt5.QtWidgets import (
     QFileDialog, QMessageBox, QDialog
 )

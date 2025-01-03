@@ -1,6 +1,6 @@
 import inspect
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSpinBox, QLabel
-from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtCore import QTimer, pyqtSignal, Qt
 
 
 class ControllerDialog(QWidget):
@@ -8,10 +8,15 @@ class ControllerDialog(QWidget):
 
     def __init__(self, instance, parent=None):
         super().__init__(parent)
+        self.setWindowTitle("Controller")  # Set initial title
+
+        self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint)
+
         self.instance = instance
 
         # Extract unique parameters from the __init__ method
         self.unique_params = self.get_unique_params()
+        self.setFixedSize(200, 100)  # Optional: Set a fixed size to prevent resizing
 
         # Layout for controls
         self.layout = QVBoxLayout(self)
@@ -23,7 +28,7 @@ class ControllerDialog(QWidget):
             spin_box = QSpinBox()
             spin_box.setRange(0, 1000)  # Adjust range as needed
             spin_box.setValue(value)
-            spin_box.valueChanged.connect(lambda v, p=param: self.update_param(p, v))
+            spin_box.valueChanged.connect(lambda v, p=param: self.param_changed.emit(p, v))
 
             self.layout.addWidget(label)
             self.layout.addWidget(spin_box)
@@ -49,9 +54,5 @@ class ControllerDialog(QWidget):
             param: getattr(self.instance, param, subclass_params[param].default)
             for param in unique_param_names if param != "self"
         }
-
-    def update_param(self, param, value):
-        """Update the parameter value in the instance."""
-        setattr(self.instance, param, value)
 
 

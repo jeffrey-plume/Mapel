@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QPushButton, QWidget,
     QLabel, QLineEdit, QComboBox, QMessageBox, QFileDialog, QProgressBar
 )
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from cellpose import io
@@ -15,16 +15,21 @@ class ImageViewer(QMainWindow):
         self.image_paths = {key:None for key in list(image_paths.keys())} 
         self.image_files = list(image_paths.values())
         self.current_index = index
-        
+        self.update_timer = QTimer(self)
+        self.update_timer.setSingleShot(True)  # Ensure the timer triggers only once
+        self.update_timer.timeout.connect(self._delayed_update_param)
         # Initialize UI
-        self.setWindowTitle('Image Viewer')
-        self.resize(600, 450)
-
+        self.title = 'Image Viewer'
+        #self.resize(600, 450)
+        
         # Image display
         self.figure = Figure()
+        self.figure.tight_layout()
         self.canvas = FigureCanvas(self.figure)
 
-
+        # Parameters to update
+        self.param_name = None
+        self.param_value = None
 
         # Main layout
         central_widget = QWidget()
@@ -37,6 +42,29 @@ class ImageViewer(QMainWindow):
         if self.image_paths:
             self.compute()
 
+
+    def update_param(self, param_name, value):
+        """
+        Update parameters with a delay and recompute the image.
+
+        Args:
+            param_name (str): The parameter name to update.
+            value (int/float): The new value for the parameter.
+        """
+        self.param_name = param_name
+        self.param_value = value
+        self.update_timer.start(300)  # Delay of 500 ms (adjust as needed)
+
+    def _delayed_update_param(self):
+        """
+        Perform the delayed parameter update.
+        """
+        if self.param_name and hasattr(self, self.param_name):
+            setattr(self, self.param_name, self.param_value)
+            self.set_current_index(self.current_index)
+        else:
+            QMessageBox.warning(self, "Parameter Error", f"Parameter '{self.param_name}' not found.")
+            
     def set_current_index(self, index):
         """Slot to update the current index and refresh the image."""
         if 0 <= index < len(self.image_paths):
@@ -69,7 +97,7 @@ class ImageViewer(QMainWindow):
                 return
     
         # Update the window title to include the current filename
-        self.setWindowTitle(f"Image Viewer - {current_filename}")
+        self.setWindowTitle(f"{self.title} - {current_filename}")
     
         self.display_image()
 
@@ -86,7 +114,7 @@ class ImageViewer(QMainWindow):
     
         if img is not None:
             # Update the title with the current image name
-            self.setWindowTitle(f"Image Viewer - {current_filename}")
+            self.setWindowTitle(f"{self.title} - {current_filename}")
             self.figure.clear()
             ax = self.figure.add_subplot(111)
             ax.imshow(img, cmap='gray')

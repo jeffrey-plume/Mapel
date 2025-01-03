@@ -11,7 +11,7 @@ from PyQt5.QtCore import QSize, QFile, Qt
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QMainWindow, QAction, QFileDialog, QMessageBox, QVBoxLayout,
-    QWidget, QToolBar, QMenu, QLabel, QDialog
+    QWidget, QToolBar, QMenu, QLabel, QDialog, QProgressDialog, QApplication
 )
 
 # Application-specific imports
@@ -33,6 +33,8 @@ from dialogs.ControllerDialog import ControllerDialog
 class MainWindow(QMainWindow):
     def __init__(self, user_model, logger=None, parent=None):
         super().__init__()
+        self.setWindowTitle("Mapel")  # Set initial title
+
         self.setGeometry(300, 100, 400, 100)
 
         self.user_model = user_model
@@ -53,7 +55,7 @@ class MainWindow(QMainWindow):
         self.directory = None
         self.filenames = []
         self.current_index = 0
-        self.open_windows = []
+        self.open_windows = {}
         
 
         self.user_model.logger = self.logger
@@ -318,7 +320,7 @@ class MainWindow(QMainWindow):
     
         try:
             processor_class = self.loaded_modules[self.selected_option]
-            processor = self.open_windows[len(self.open_windows)-1]
+            processor = self.open_windows[self.selected_option]
 
             for idx in range(len(file_list)):
                 if progress_dialog.wasCanceled():
@@ -347,48 +349,47 @@ class MainWindow(QMainWindow):
             self.logger.error("Error during batch run: %s", str(e))
         finally:
             progress_dialog.close()
-       
+
+
+
     def open_module_window(self):
         """Process the current image using the selected module and display the results."""
-        if not self.file_manager.results[self.selected_option] or not self.loaded_modules[self.selected_option]:
-            QMessageBox.information(self, "No Images or Module", "No images or module to process.")
-            return
-    
-        if self.selected_option:
-            selected_option = self.selected_option
-        # Ensure the selected option exists in results
-        if selected_option not in self.file_manager.results:
-            self.file_manager.results[selected_option] = self.file_manager.results['Importer']
-    
-        file_list = self.file_manager.results[self.selected_option]
-    
-        if not (0 <= self.current_index < len(file_list)):
-            QMessageBox.warning(self, "Invalid Index", "Current index is out of range.")
-            return
-    
         try:
-            # Instantiate the processor and process the image
+            if not self.validate_selection():
+                return
+    
+            file_list = self.file_manager.results[self.selected_option]
+    
             processor_class = self.loaded_modules[self.selected_option]
             processor = processor_class(image_paths=file_list, index=self.current_index)
     
             if self.file_management_dialog:
+                self.file_management_dialog.current_index_changed.disconnect()
                 self.file_management_dialog.current_index_changed.connect(processor.set_current_index)
     
-            # Keep a reference to the viewer window to prevent garbage collection
-            self.open_windows.append(processor)
-
+            # Keep a reference to prevent garbage collection
+            self.open_windows[self.selected_option] = processor
             processor.show()
     
-            # Open ControllerDialog if the selected option is not 'Imager'
             if self.selected_option != 'Imager':
                 control = ControllerDialog(processor)
-                control.param_changed.connect(processor.compute)
-
+                control.param_changed.connect(processor.update_param)
                 control.show()
-                self.open_windows.append(control)
-    
+                self.open_windows['Controller'] = control
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Processing failed for image: {e}")
+            self.logger.error("Error in open_module_window: %s", str(e))
+
+    def validate_selection(self):
+        """Validate that the current selection and results are valid."""
+        if not self.file_manager.results.get(self.selected_option) or not self.loaded_modules.get(self.selected_option):
+            QMessageBox.information(self, "No Images or Module", "No images or module to process.")
+            return False
+    
+        if not (0 <= self.current_index < len(self.file_manager.results[self.selected_option])):
+            QMessageBox.warning(self, "Invalid Index", "Current index is out of range.")
+            return False
+        return True
 
 
     def open_file_management(self):
@@ -419,7 +420,7 @@ class MainWindow(QMainWindow):
             # Properly connect signal for current index change
             self.file_management_dialog.current_index_changed.connect(self.update_current_index)
     
-            self.open_windows.append(self.file_management_dialog)
+            self.open_windows['File_Manager'] = self.file_management_dialog
             self.file_management_dialog.show()
     
             self.logger.info("FileManagementDialog opened with %d files.", len(self.file_manager.results['Importer']))
@@ -514,21 +515,20 @@ class MainWindow(QMainWindow):
             self.logger.error("Error during closeEvent: %s", str(e))
             event.ignore()
     
+        
     def close_all_windows(self):
-        """
-        Close all open processor windows and clear the tracking list.
-        """
         try:
             self.logger.info("Closing all open processor windows.")
-            for window in self.open_windows:
+            for key, window in list(self.open_windows.items()):
                 if window and not window.isHidden():
                     window.close()
-                    self.logger.info("Closed window: %s", window.windowTitle())
+                    self.logger.info(f"Closed window: {key}")
             self.open_windows.clear()
             self.logger.info("All open windows closed successfully.")
         except Exception as e:
-            self.logger.error("Error while closing windows: %s", str(e))
-            QMessageBox.critical(self, "Error", f"An error occurred while closing windows: {str(e)}")
+            self.logger.error(f"Error while closing windows: {e}")
+            QMessageBox.critical(self, "Error", f"An error occurred while closing windows: {e}")
+    
 
 
 if __name__ == "__main__":

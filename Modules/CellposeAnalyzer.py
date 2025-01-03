@@ -71,21 +71,19 @@ class CellposeAnalyzer(ImageViewer):
         # Process the image using Cellpose
         img = self.image_paths[current_filename]
         try:
-            masks, flows, styles = models.CellposeModel(model_type='cyto3').eval(img,
+            masks, flows, styles, _ = self.model.eval(img,
                             diameter=self.diameter, channels=[1,2])
             mask_RGB = plot.mask_overlay(img, masks)
             self.image_paths[current_filename] = mask_RGB
 
             
-            self.setWindowTitle(f"CellposeAnalyzer- {current_filename}")
+            self.title = f"CellposeAnalyzer- {current_filename}"
         
             self.display_image()
             
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to process image: {e}")
             return
-
-
 
 
 
