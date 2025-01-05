@@ -14,7 +14,7 @@ from skimage.measure import regionprops, label
 import logging
 
 class CellposeAnalyzer(ImageViewer):
-    def __init__(self, index=0, diameter=25, image_paths=None, logger = None):
+    def __init__(self, image_paths=None, index=0, logger = None, diameter=25):
         """
         Subclass of ImageViewer that integrates Cellpose analysis.
         """
@@ -27,7 +27,7 @@ class CellposeAnalyzer(ImageViewer):
         # Initialize the parent class (ImageViewer)
         super().__init__(image_paths=image_paths, index=index, logger=logger)
 
-    def read_image(self, image_path):
+    def analyze(self, image_path):
         """
         Read an image and apply Cellpose analysis.
         """

@@ -1,0 +1,6 @@
+{"timestamp": "2025-01-05 11:56:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-05 11:56:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-05 11:56:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-05 11:56:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-05 11:58:10", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Login canceled by user."}
+{"timestamp": "2025-01-05 11:58:10", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

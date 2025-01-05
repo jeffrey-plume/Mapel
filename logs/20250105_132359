@@ -1,0 +1,11 @@
+{"timestamp": "2025-01-05 13:23:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-05 13:23:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-05 13:23:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-05 13:23:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-05 13:24:10", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-05 13:24:13", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Opening User Management dialog."}
+{"timestamp": "2025-01-05 13:24:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User Management dialog closed."}
+{"timestamp": "2025-01-05 13:26:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-05 13:26:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-05 13:26:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-05 13:26:43", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

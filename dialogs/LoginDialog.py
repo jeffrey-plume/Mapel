@@ -15,10 +15,10 @@ class LoginDialog(QDialog):
         self.logger = logger
         self.login_attempts = 0
         self.max_attempts = 3
-        self.lockout_duration = 10000  # Lockout duration in milliseconds (10 seconds)
+        self.lockout_duration = 900000  # Lockout duration in milliseconds (10 seconds)
         self.lockout_timer = None  # Timer for lockout
 
-    def setup_ui(self, us = 'v84v', pw='hartmans87$'):
+    def setup_ui(self, us = None, pw= None):
         """Setup the UI elements."""
         self.username_label = QLabel("Username:")
         self.username_input = QLineEdit()
@@ -33,8 +33,6 @@ class LoginDialog(QDialog):
         self.login_button = QPushButton("Login")
         self.login_button.clicked.connect(self.handle_login)
 
-        self.register_button = QPushButton("Register")
-        self.register_button.clicked.connect(self.handle_register)
 
         layout = QVBoxLayout()
         layout.addWidget(self.username_label)
@@ -42,7 +40,6 @@ class LoginDialog(QDialog):
         layout.addWidget(self.password_label)
         layout.addWidget(self.password_input)
         layout.addWidget(self.login_button)
-        layout.addWidget(self.register_button)
         self.setLayout(layout)
 
     def handle_login(self):
@@ -121,14 +118,5 @@ class LoginDialog(QDialog):
         QMessageBox.information(self, "Lockout Ended", "You can try logging in again.")
         self.logger.info("Login attempts reset.")
 
-    def handle_register(self):
-        """Open the Register Dialog."""
-        try:
-            register_dialog = RegisterDialog(self.user_model, self, logger = self.logger)
-            if register_dialog.exec_() == QDialog.Accepted:
-                QMessageBox.information(self, "Success", "User registered successfully. Please log in.")
-                self.logger.info("New user registered successfully.")
-        except Exception as e:
-            QMessageBox.critical(self, "Error", f"Registration failed: {e}")
-            self.logger.error(f"Registration error: {e}")
+
 

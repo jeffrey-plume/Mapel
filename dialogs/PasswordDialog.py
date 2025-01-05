@@ -20,7 +20,7 @@ class PasswordDialog(QDialog):
 
         self.setup_ui()
 
-    def setup_ui(self, pw = "Barcelona123"):
+    def setup_ui(self, pw = None):
         """Initialize UI components."""
         self.label_password = QLabel("Enter your password:")
         self.password_input = QLineEdit()

@@ -23,7 +23,7 @@ class ControllerDialog(QWidget):
         for param, value in self.unique_params.items():
                     
             self.setWindowTitle(param)  # Set initial title
-            self.setGeometry(500, 500, 50, 100)
+            self.setGeometry(500, 500, 50, 50)
 
             self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint)
             #label = QLabel(f"{param}:")
@@ -31,6 +31,7 @@ class ControllerDialog(QWidget):
             spin_box.setRange(0, 1000)  # Adjust range as needed
             spin_box.setValue(value)
             spin_box.valueChanged.connect(lambda x, p=param: self.emit_param_changed(p, x))
+            spin_box.setFixedSize(100, 30)  # Width: 100px, Height: 30px
 
             #self.layout.addWidget(label)
             self.layout.addWidget(spin_box)

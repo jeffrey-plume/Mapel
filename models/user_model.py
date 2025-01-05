@@ -237,7 +237,7 @@ class UserModel:
     
     def register_user(self, username: str, password: str, is_admin: bool = False):
         """Register a new user."""
-        if self.get_user_credentials():
+        if self.get_user_credentials(username = username):
             raise ValueError(f"User '{username}' already exists.")
     
         try:
@@ -344,17 +344,47 @@ class UserModel:
         self.log_action("User deleted")
         self.logger.info(f"User '{username}' deleted successfully.")
 
-
-    def update_user(self, username: str, **fields):
-        if not fields:
-            raise ValueError("No fields provided to update.")
-
-        set_clause = ", ".join([f"{key} = ?" for key in fields.keys()])
-        query = f"UPDATE users SET {set_clause} WHERE username = ?"
-        self._execute_query(query, (*fields.values(), username))
-        self.log_action("User information updated")
-
+    def update_user(self, username: str, password: str, is_admin: bool = False):
+        """
+        Update an existing user's details, such as password and admin status.
+        
+        Args:
+            username (str): The username of the user to update.
+            password (str): The new password for the user.
+            is_admin (bool): Whether the user should have admin privileges. Defaults to False.
     
+        Raises:
+            Exception: If the query fails.
+        """
+        try:
+            # Generate salt and hash the new password
+            salt = SecurityService.generate_salt()
+            password_hash = SecurityService.hash_password(password, salt)
+    
+            # SQL query for updating user details
+            query = '''
+                UPDATE users
+                SET password_hash = ?, salt = ?, admin = ?
+                WHERE username = ?
+            '''
+    
+            # Execute the query
+            self._execute_query(query, (
+                password_hash,
+                salt,
+                int(is_admin),  # Convert boolean to integer (1 or 0)
+                username,
+            ))
+    
+            # Log success
+            self.logger.info(f"User '{username}' updated successfully.")
+    
+        except Exception as e:
+            # Log failure and raise the exception
+            self.logger.error(f"Failed to update user '{username}': {e}")
+            raise
+    
+        
     def get_audit_trail(self, limit: int = 50, offset: int = 0) -> pd.DataFrame:
         query = """
             SELECT username, date, time, action
@@ -366,8 +396,6 @@ class UserModel:
         # Convert rows to a DataFrame
         df = pd.DataFrame(rows, columns=["username", "date", "time", "action"])
         return df
-
-
 
     def get_all_users(self):
         """

@@ -57,7 +57,7 @@ class ImageViewer(QMainWindow):
                 QMessageBox.warning(self, "Invalid Parameter", f"Attribute {param} does not exist.")
                 return
 
-            self.output[self.filenames[self.current_index]] = self.read_image(
+            self.output[self.filenames[self.current_index]] = self.analyze(
                 self.image_paths[self.filenames[self.current_index]]
             )
             self.display_image(self.output[self.filenames[self.current_index]])
@@ -94,7 +94,7 @@ class ImageViewer(QMainWindow):
             self.output[self.filenames[self.current_index]] = image_path
         else:
             try:
-                self.output[self.filenames[self.current_index]] = self.read_image(image_path)
+                self.output[self.filenames[self.current_index]] = self.analyze(image_path)
                 if self.output[self.filenames[self.current_index]] is None:
                     QMessageBox.critical(self, "Error", f"Failed to load image '{self.filenames[self.current_index]}'.")
                     return
@@ -163,7 +163,7 @@ class ImageViewer(QMainWindow):
             QMessageBox.warning(self, "Display Error", "The image could not be displayed.")
 
 
-    def read_image(self, image_path):
+    def analyze(self, image_path):
         """Read and return the image."""
         if isinstance(image_path, np.ndarray):
             return image_path

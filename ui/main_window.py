@@ -97,7 +97,7 @@ class MainWindow(QMainWindow):
         self.module_menu = QMenu("Module", self)
         self.load_module_options()
         analysis_menu.addMenu(self.module_menu)
-        analysis_menu.addAction(self.create_action("File Management", self.open_file_management))
+        analysis_menu.addAction(self.create_action("File Manager", self.open_file_management))
 
         # Add Run action
         self.run_action = self.create_action("Run", self.run_selected_option)
@@ -369,9 +369,9 @@ class MainWindow(QMainWindow):
                     break
 
                 processor.current_index = idx
-                self.logger.info(f"Processing file {idx + 1}/{len(file_list)}")
+                self.logger.info(f"Processing file {list(file_list.values())[idx]}")
                 
-                # Instantiate processor and process file
+                # Instantiate processor and process fileidx
                 processor.compute()
     
                 # Update progress dialog

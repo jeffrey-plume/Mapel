@@ -1,0 +1,37 @@
+{"timestamp": "2025-01-05 17:03:10", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-05 17:03:10", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-05 17:03:10", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-05 17:03:10", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-05 17:03:21", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-05 17:03:23", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Opening User Management dialog."}
+{"timestamp": "2025-01-05 17:46:08", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User Management dialog closed."}
+{"timestamp": "2025-01-05 17:46:31", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-05 17:46:31", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 26 files."}
+{"timestamp": "2025-01-05 17:46:32", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 26 files."}
+{"timestamp": "2025-01-05 17:46:56", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\0a55e7c93f.png"}
+{"timestamp": "2025-01-05 17:46:58", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\2daa27a6df.png"}
+{"timestamp": "2025-01-05 17:47:02", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\7fabcfe23f.png"}
+{"timestamp": "2025-01-05 17:47:04", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\8cee575b39.png"}
+{"timestamp": "2025-01-05 17:47:07", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\9c29ca7edf.png"}
+{"timestamp": "2025-01-05 17:47:09", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\15a3ba1c51.png"}
+{"timestamp": "2025-01-05 17:47:12", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\39b0dc1f52.png"}
+{"timestamp": "2025-01-05 17:47:16", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\207bb15702.png"}
+{"timestamp": "2025-01-05 17:47:18", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\226dc58f03.png"}
+{"timestamp": "2025-01-05 17:47:21", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\7701ac03c1.png"}
+{"timestamp": "2025-01-05 17:47:23", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\47286679c2.png"}
+{"timestamp": "2025-01-05 17:47:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\2556313831.png"}
+{"timestamp": "2025-01-05 17:47:26", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\a9a628444d.png"}
+{"timestamp": "2025-01-05 17:47:31", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\a59bcf3f13.png"}
+{"timestamp": "2025-01-05 17:47:36", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\a68915823c.png"}
+{"timestamp": "2025-01-05 17:47:40", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\af124a45d9.png"}
+{"timestamp": "2025-01-05 17:47:44", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\b78f5fdc22.png"}
+{"timestamp": "2025-01-05 17:47:47", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\b996f341bd.png"}
+{"timestamp": "2025-01-05 17:47:54", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\c5c0825297.png"}
+{"timestamp": "2025-01-05 17:47:58", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\cd22803960.png"}
+{"timestamp": "2025-01-05 17:48:01", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\ce2f96aae1.png"}
+{"timestamp": "2025-01-05 17:48:05", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\ce41e4e56d.png"}
+{"timestamp": "2025-01-05 17:48:09", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\dc25ff5266.png"}
+{"timestamp": "2025-01-05 17:48:12", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\e49ed62b0b.png"}
+{"timestamp": "2025-01-05 17:48:14", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\e83de4878a.png"}
+{"timestamp": "2025-01-05 17:48:18", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file C:/Users/Lenovo/OneDrive/Documents/Images\\f5235de51f.png"}
+{"timestamp": "2025-01-05 17:48:35", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Batch run completed successfully."}
