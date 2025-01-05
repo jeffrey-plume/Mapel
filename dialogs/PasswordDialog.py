@@ -1,17 +1,17 @@
-from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QVBoxLayout, QPushButton, QMessageBox, QTextEdit
+from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QVBoxLayout, QPushButton, QMessageBox, QTextEdit, QComboBox
 from PyQt5.QtCore import QTimer
 import logging
 
-logger = logging.getLogger(__name__)
 
 class PasswordDialog(QDialog):
-    def __init__(self, user_model, parent=None):
+    def __init__(self, user_model, parent=None, logger = logging.getLogger(__name__)):
         super().__init__(parent)
         self.setWindowTitle("Enter Password and Comments")
         self.setFixedSize(300, 250)
 
         self.password = None
         self.comments = None
+        self.reason = None
         self.user_model = user_model
         self.submit_attempts = 0
         self.max_attempts = 3
@@ -26,6 +26,10 @@ class PasswordDialog(QDialog):
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setText(pw)
 
+        self.label_reason = QLabel("Select a reason:")
+        self.reason_dropdown = QComboBox()
+        self.reason_dropdown.addItems(["Authorship", "Review"])  # Add dropdown options
+
         self.label_comments = QLabel("Enter comments (optional):")
         self.comments_input = QTextEdit()
 
@@ -39,6 +43,8 @@ class PasswordDialog(QDialog):
         layout.addWidget(self.label_password)
         layout.addWidget(self.password_input)
         layout.addWidget(self.label_comments)
+        layout.addWidget(self.reason_dropdown)  # Add dropdown to layout
+
         layout.addWidget(self.comments_input)
         layout.addWidget(self.submit_button)
         layout.addWidget(self.cancel_button)
@@ -48,6 +54,7 @@ class PasswordDialog(QDialog):
         """Handle password submission."""
         self.password = self.password_input.text().strip()
         self.comments = self.comments_input.toPlainText().strip()
+        self.reason = self.reason_dropdown.currentText().strip()  # Get selected reason
 
         if not self.password:
             QMessageBox.warning(self, "Invalid Input", "Password cannot be empty.")
@@ -55,14 +62,15 @@ class PasswordDialog(QDialog):
 
         try:
             if self.user_model.verify_credentials(self.user_model.username, self.password):
-                logger.info(f"User '{self.user_model.username}' authenticated successfully.")
-                self.accept()  # Close dialog with QDialog.Accepted
-                return [self.password,  self.comments]
+                self.logger.info(f"User '{self.user_model.username}' authenticated successfully.")
+                self.accept() 
+                
+                return [self.password, self.reason,  self.comments]
             else:
                 self.handle_failed_submit()
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Submit failed: {e}")
-            logger.error(f"Unexpected error during submit: {e}")
+            self.logger.error(f"Unexpected error during submit: {e}")
 
     def handle_failed_submit(self):
         """Handle failed submission attempts."""
@@ -71,7 +79,7 @@ class PasswordDialog(QDialog):
         self.password_input.setFocus()
 
         self.user_model.log_action("Submit failed")
-        logger.warning(f"Submit failed for user '{self.user_model.username}'.")
+        self.logger.warning(f"Submit failed for user '{self.user_model.username}'.")
 
         if self.submit_attempts >= self.max_attempts:
             self.lock_out_user()
@@ -88,7 +96,7 @@ class PasswordDialog(QDialog):
         self.submit_button.setDisabled(True)
         self.password_input.clear()
         self.user_model.log_action("User locked out")
-        logger.warning(f"User '{self.user_model.username}' locked out due to too many failed attempts.")
+        self.logger.warning(f"User '{self.user_model.username}' locked out due to too many failed attempts.")
 
         QMessageBox.critical(
             self,
@@ -103,5 +111,5 @@ class PasswordDialog(QDialog):
         self.submit_attempts = 0
         self.submit_button.setEnabled(True)
         QMessageBox.information(self, "Lockout Ended", "You can try submitting again.")
-        logger.info("Submit attempts reset and lockout ended.")
+        self.logger.info("Submit attempts reset and lockout ended.")
 

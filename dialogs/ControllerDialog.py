@@ -8,15 +8,12 @@ class ControllerDialog(QWidget):
 
     def __init__(self, instance, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Controller")  # Set initial title
 
-        self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint)
 
         self.instance = instance
 
         # Extract unique parameters from the __init__ method
         self.unique_params = self.get_unique_params()
-        self.setFixedSize(200, 100)  # Optional: Set a fixed size to prevent resizing
 
         # Layout for controls
         self.layout = QVBoxLayout(self)
@@ -24,13 +21,18 @@ class ControllerDialog(QWidget):
 
         # Create a spin box for each unique parameter
         for param, value in self.unique_params.items():
-            label = QLabel(f"{param}:")
+                    
+            self.setWindowTitle(param)  # Set initial title
+            self.setGeometry(500, 500, 50, 100)
+
+            self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.CustomizeWindowHint)
+            #label = QLabel(f"{param}:")
             spin_box = QSpinBox()
             spin_box.setRange(0, 1000)  # Adjust range as needed
             spin_box.setValue(value)
-            spin_box.valueChanged.connect(lambda v, p=param: self.param_changed.emit(p, v))
+            spin_box.valueChanged.connect(lambda x, p=param: self.emit_param_changed(p, x))
 
-            self.layout.addWidget(label)
+            #self.layout.addWidget(label)
             self.layout.addWidget(spin_box)
             self.spin_boxes[param] = spin_box
 
@@ -55,4 +57,7 @@ class ControllerDialog(QWidget):
             for param in unique_param_names if param != "self"
         }
 
-
+    def emit_param_changed(self, param, value):
+        """Emit the param_changed signal and update the instance."""
+        setattr(self.instance, param, value)
+        self.param_changed.emit(param, value)

@@ -1,0 +1,21 @@
+{"timestamp": "2025-01-04 00:47:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-04 00:47:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-04 00:47:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-04 00:47:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-04 00:47:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "User v84v logged in."}
+{"timestamp": "2025-01-04 00:47:43", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-04 00:47:43", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 7 files."}
+{"timestamp": "2025-01-04 00:47:43", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 7 files."}
+{"timestamp": "2025-01-04 00:48:18", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 1/7"}
+{"timestamp": "2025-01-04 00:48:21", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 2/7"}
+{"timestamp": "2025-01-04 00:48:23", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 3/7"}
+{"timestamp": "2025-01-04 00:48:26", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 4/7"}
+{"timestamp": "2025-01-04 00:48:28", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 5/7"}
+{"timestamp": "2025-01-04 00:48:31", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 6/7"}
+{"timestamp": "2025-01-04 00:48:35", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Processing file 7/7"}
+{"timestamp": "2025-01-04 00:48:41", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Batch run completed successfully."}
+{"timestamp": "2025-01-04 00:53:16", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-04 00:53:16", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: File_Manager"}
+{"timestamp": "2025-01-04 00:53:16", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-04 00:53:16", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-04 00:53:16", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

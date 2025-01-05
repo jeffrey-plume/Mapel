@@ -1,0 +1,10 @@
+{"timestamp": "2025-01-04 18:42:01", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-04 18:42:01", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-04 18:42:01", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-04 18:42:01", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-04 18:42:03", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "User v84v logged in."}
+{"timestamp": "2025-01-04 18:42:09", "username": "v84v", "logger_name": "__main__", "log_level": "ERROR", "message": "Failed to load module 'CellposeAnalyzer': invalid syntax (CellposeAnalyzer.py, line 12)"}
+{"timestamp": "2025-01-04 18:42:34", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-04 18:42:34", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-04 18:42:34", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-04 18:42:34", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

@@ -77,8 +77,6 @@ class FileManager(QObject):
                 self.file_path = file_path
                 self.results = results
 
-                
-                print(self.results['Importer'])
                 # Emit files_imported signal if 'Importer' key exists
                 if 'Importer' in self.results:
                     filenames = list(self.results['Importer'].values())
@@ -121,30 +119,27 @@ class FileManager(QObject):
             except Exception as e:
                 QMessageBox.critical(None, "Error", f"Failed to save file: {e}")
                 
-
     def save_file(self):
         """Save the current data to the file path."""
         if not self.file_path:
             self.save_as()
             if not self.file_path:  # User canceled save_as dialog
                 return
-        
+    
         try:
             # Log the save attempt
             self.logger.info(f"Attempting to save file: {self.file_path}")
-            
-            # Ensure 'Audit_Trail' is initialized
-            if 'Audit_Trail' not in self.results:
-                self.results['Audit_Trail'] = []
     
-            # Extend the audit trail with new entries
+            # Get new audit trail entries
             new_audit = self.get_audit_trail()
-            if new_audit:
-                self.results['Audit_Trail'].extend(new_audit)
+            
+            # Ensure 'Audit_Trail' exists in results
+            if 'Audit_Trail' not in self.results or not self.results['Audit_Trail']:
+                self.results['Audit_Trail'] = new_audit
             else:
-                self.logger.warning("Unexpected audit trail format or empty data.")
-                QMessageBox.warning(self.main_window, "Warning", "Failed to add new audit trail entries. Format mismatch.")
-
+                # Update existing audit trail with new entries
+                self.results['Audit_Trail'].update(new_audit)
+    
             # Save the results to the file
             with h5py.File(self.file_path, 'w') as h5f:
                 save_dict_to_hdf5(self.results, h5f)
@@ -153,6 +148,10 @@ class FileManager(QObject):
             self.unsaved_changes = False
             QMessageBox.information(self.main_window, "File Saved", f"File successfully saved to: {self.file_path}")
             self.logger.info(f"File saved successfully: {self.file_path}")
+        except Exception as e:
+            QMessageBox.critical(self.main_window, "Save Failed", f"An error occurred while saving the file: {e}")
+            self.logger.error(f"Error saving file {self.file_path}: {e}")
+
         
         except Exception as e:
             import traceback

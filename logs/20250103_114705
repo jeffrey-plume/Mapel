@@ -1,0 +1,13 @@
+{"timestamp": "2025-01-03 11:47:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-03 11:47:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-03 11:47:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-03 11:47:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-03 11:47:09", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
+{"timestamp": "2025-01-03 11:47:16", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-03 11:47:16", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-03 11:47:16", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-03 11:47:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-03 11:47:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: File_Manager"}
+{"timestamp": "2025-01-03 11:47:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-03 11:47:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-03 11:47:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

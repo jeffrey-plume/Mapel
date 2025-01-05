@@ -1,0 +1,14 @@
+{"timestamp": "2025-01-04 22:59:18", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-04 22:59:18", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-04 22:59:18", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-04 22:59:18", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-04 22:59:22", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "User v84v logged in."}
+{"timestamp": "2025-01-04 22:59:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-04 22:59:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-04 22:59:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-04 23:01:50", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-04 23:01:50", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: Imager"}
+{"timestamp": "2025-01-04 23:01:50", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: Controller"}
+{"timestamp": "2025-01-04 23:01:50", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-04 23:01:50", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-04 23:01:50", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

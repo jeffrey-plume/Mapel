@@ -207,27 +207,27 @@ class MainWindow(QMainWindow):
         """Update the selected module and ensure only one option is checked."""
         # Uncheck all options
         for option_name, action in self.options.items():
-            if option_name == selected_option:
-                action.setChecked(True)  # Check the selected option
-            else:
-                action.setChecked(False)  # Uncheck others
+            action.setChecked(option_name == selected_option)
     
         self.module_status_label.setText(f"Selected Module: {selected_option}")
         self.module_status_label.setStyleSheet(
             "color: white; font-weight: bold; font-size: 14px; background-color: black;"
         )
-
-
-        # Ensure the selected option exists in results
+    
+        # Ensure the 'Importer' key exists in results
+        if 'Importer' not in self.file_manager.results:
+            self.file_manager.results = {}
+    
+        # Initialize selected_option with Importer data if it doesn't exist
         if selected_option not in self.file_manager.results:
             self.file_manager.results[selected_option] = self.file_manager.results['Importer']
-        
-        
+    
+        # Update the selected option and enable actions
         self.selected_option = selected_option
-        self.run_action.setDisabled(False)  # Enable Run action
-        self.run_button_action.setDisabled(False)  # Enable Run button
+        self.run_action.setDisabled(False)
+        self.run_button_action.setDisabled(False)
         self.open_module_window()
-       
+
 
     
 
@@ -359,23 +359,27 @@ class MainWindow(QMainWindow):
                 return
     
             file_list = self.file_manager.results[self.selected_option]
-    
-            processor_class = self.loaded_modules[self.selected_option]
-            processor = processor_class(image_paths=file_list, index=self.current_index)
-    
+        
+            if self.selected_option in self.open_windows:
+                processor = self.open_windows[self.selected_option]
+            else:
+                processor_class = self.loaded_modules[self.selected_option]
+                processor = processor_class(image_paths=file_list, index=self.current_index)
+                self.open_windows[self.selected_option] = processor
+
             if self.file_management_dialog:
                 self.file_management_dialog.current_index_changed.disconnect()
                 self.file_management_dialog.current_index_changed.connect(processor.set_current_index)
-    
-            # Keep a reference to prevent garbage collection
-            self.open_windows[self.selected_option] = processor
+
             processor.show()
-    
+
             if self.selected_option != 'Imager':
                 control = ControllerDialog(processor)
-                control.param_changed.connect(processor.update_param)
+                # Ensure `param` is a string when passed
+                control.param_changed.connect(lambda p, v: processor.debounce_update(str(p), v))
                 control.show()
                 self.open_windows['Controller'] = control
+
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Processing failed for image: {e}")
             self.logger.error("Error in open_module_window: %s", str(e))

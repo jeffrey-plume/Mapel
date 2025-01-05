@@ -3,7 +3,7 @@ import importlib.util
 import h5py 
 import json
 import numpy as np
-
+from datetime import datetime
 import importlib.util
 import os
 
@@ -38,6 +38,8 @@ def save_dict_to_hdf5(data_dict, h5_group):
             h5_group.create_dataset(str(key), data="None")
         elif isinstance(value, np.ndarray):
             h5_group.create_dataset(str(key), data=value)
+        elif isinstance(value, datetime):
+            h5_group.create_dataset(str(key), data=str(value))
         elif isinstance(value, dict):
             subgroup = h5_group.create_group(str(key))
             save_dict_to_hdf5(value, subgroup)
@@ -52,8 +54,8 @@ def load_dict_from_hdf5(h5_group):
         else:
             value = item[()]
             if isinstance(value, bytes):
-                value = value.decode('utf-8')
-            data_dict[key] = None if value == "None" else value.strip('"').replace('\\\\', '\\')
+                value = value.decode('utf-8').strip('"').replace('\\\\', '\\')
+            data_dict[key] = None if value == "None" else value
 
     return data_dict
 

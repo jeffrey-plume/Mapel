@@ -316,7 +316,14 @@ class UserModel:
         try:
             salt = user_data['salt']
             password_hash = SecurityService.hash_password(password, salt)
+
+
+            self.logger.debug(f"Encrypted Private Key: {user_data['encrypted_private_key']}")
+            self.logger.debug(f"Salt: {user_data['salt']}")
+            self.logger.debug(f"Password Hash: {password_hash}")
             return SecurityService.decrypt_private_key(user_data['encrypted_private_key'], password_hash)
+
+        
         except Exception as e:
             self.logger.error(f"Error decrypting private key for '{self.username}': {e}")
             return None
