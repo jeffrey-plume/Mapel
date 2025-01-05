@@ -1,0 +1,17 @@
+{"timestamp": "2025-01-05 01:12:39", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
+{"timestamp": "2025-01-05 01:12:39", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
+{"timestamp": "2025-01-05 01:12:39", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
+{"timestamp": "2025-01-05 01:12:39", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
+{"timestamp": "2025-01-05 01:12:47", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "User v84v logged in."}
+{"timestamp": "2025-01-05 01:12:55", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Files successfully imported."}
+{"timestamp": "2025-01-05 01:12:55", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
+{"timestamp": "2025-01-05 01:12:55", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
+{"timestamp": "2025-01-05 01:12:59", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Headers: ['Filename', 'Dimensions (Loaded)', 'File Size (KB)']"}
+{"timestamp": "2025-01-05 01:12:59", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Table Data: [['0a55e7c93f', '(512, 683, 3)', '320.63 KB'], ['2daa27a6df', '(512, 647, 3)', '297.28 KB'], ['7fabcfe23f', '(512, 634, 3)', '232.25 KB'], ['8cee575b39', '(512, 595, 3)', '269.93 KB'], ['9c29ca7edf', '(535, 512, 3)', '254.62 KB'], ['15a3ba1c51', '(512, 741, 3)', '323.42 KB'], ['39b0dc1f52', '(512, 681, 3)', '264.49 KB'], ['207bb15702', '(512, 743, 3)', '240.05 KB'], ['226dc58f03', '(512, 778, 3)', '283.85 KB'], ['7701ac03c1', '(512, 603, 3)', '176.79 KB'], ['47286679c2', '(512, 686, 3)', '248.91 KB'], ['2556313831', '(512, 701, 3)', '216.96 KB'], ['a9a628444d', '(512, 765, 3)', '239.54 KB'], ['a59bcf3f13', '(512, 657, 3)', '274.33 KB']]"}
+{"timestamp": "2025-01-05 01:14:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closing all open processor windows."}
+{"timestamp": "2025-01-05 01:14:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: File_Manager"}
+{"timestamp": "2025-01-05 01:14:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: Imager"}
+{"timestamp": "2025-01-05 01:14:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Closed window: Controller"}
+{"timestamp": "2025-01-05 01:14:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "All open windows closed successfully."}
+{"timestamp": "2025-01-05 01:14:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Application closed successfully."}
+{"timestamp": "2025-01-05 01:14:32", "username": "v84v", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

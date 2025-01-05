@@ -216,10 +216,6 @@ class FileManager(QObject):
             return None
     
 
-
-
-
-
     def get_signatures_table_data(self):
         """
         Prepare table data for displaying signatures.

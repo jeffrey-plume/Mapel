@@ -9,6 +9,7 @@ class PasswordDialog(QDialog):
         self.setWindowTitle("Enter Password and Comments")
         self.setFixedSize(300, 250)
 
+        self.logger = logger
         self.password = None
         self.comments = None
         self.reason = None

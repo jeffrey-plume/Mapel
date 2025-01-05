@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
         # Utilities menu
         utilities_menu = menu_bar.addMenu("Utilities")
 
-        utilities_menu.addAction(self.create_action("Table View", lambda: self.update_selection('Imager'), "icons/imager.png"))
+        utilities_menu.addAction(self.create_action("Table View", lambda: self.show_table, "icons/tabular.png"))
         utilities_menu.addAction(self.create_action("Image View", lambda: self.update_selection('Imager'), "icons/imager.png"))
         utilities_menu.addSeparator()
 
@@ -142,7 +142,7 @@ class MainWindow(QMainWindow):
         toolbar.addSeparator()
     
         # Add Tabular button
-        toolbar.addAction(self.create_action("Tabular", lambda: self.update_selection('Imager'), "icons/tabular.png"))
+        toolbar.addAction(self.create_action("Tabular", self.show_table, "icons/tabular.png"))
     
         # Add Image button
         toolbar.addAction(self.create_action("Image", lambda: self.update_selection('Imager'), "icons/imager.png"))
@@ -157,6 +157,47 @@ class MainWindow(QMainWindow):
         toolbar.addAction(self.create_action("Audit Trail", self.view_audit_trail, "icons/audit_logo.png"))
         toolbar.addAction(self.create_action("Sign Results", self.sign_results, "icons/signature_logo.png")) 
 
+    def show_table(self):
+        """
+        Display a table with metadata for the selected module.
+        """
+        try:
+            # Validate the selected module
+            if not self.validate_selection():
+                return
+    
+            # Get the file list for the selected option
+            file_list = self.file_manager.results.get(self.selected_option, None)
+            if not file_list:
+                QMessageBox.warning(self, "No Files", f"No files available for the selected module: {self.selected_option}")
+                return
+    
+            # Retrieve or initialize the processor
+            if self.selected_option in self.open_windows:
+                processor = self.open_windows[self.selected_option]
+            else:
+                processor_class = self.loaded_modules.get(self.selected_option)
+                if not processor_class:
+                    QMessageBox.critical(self, "Error", f"Module class not found for: {self.selected_option}")
+                    return
+    
+                processor = processor_class(image_paths=file_list, index=self.current_index, logger=self.logger)
+                self.open_windows[self.selected_option] = processor
+    
+            headers, table_data = processor.tabulate()
+
+            if not headers or not table_data:
+                QMessageBox.warning(self, "No Data", "No metadata available for the selected module.")
+                return
+    
+            # Display the table dialog
+            dialog = TableDialog(table_data, headers, title="File Metadata", parent=self)
+            self.open_windows['Data Table'] = dialog
+            dialog.exec_()
+    
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to display table: {e}")
+            self.logger.error(f"Error in show_table: {e}")
 
 
     def sign_results(self):
@@ -364,7 +405,7 @@ class MainWindow(QMainWindow):
                 processor = self.open_windows[self.selected_option]
             else:
                 processor_class = self.loaded_modules[self.selected_option]
-                processor = processor_class(image_paths=file_list, index=self.current_index)
+                processor = processor_class(image_paths=file_list, index=self.current_index, logger = self.logger)
                 self.open_windows[self.selected_option] = processor
 
             if self.file_management_dialog:

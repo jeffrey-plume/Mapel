@@ -8,14 +8,15 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from cellpose import io
 import os
 import numpy as np
+import logging
 
 class ImageViewer(QMainWindow):
-    def __init__(self, image_paths=None, index=0):
+    def __init__(self, image_paths=None, index=0, logger = logging.getLogger(__name__)):
         super().__init__()
         self.image_paths = image_paths
         self.output = {key: None for key in image_paths.keys()}
         self.filenames = list(image_paths.keys())
-
+        self.logger = logger
         self.current_index = index
         self.update_timer = QTimer(self)
         self.update_timer.setSingleShot(True)
@@ -102,6 +103,50 @@ class ImageViewer(QMainWindow):
                 return
 
         self.display_image(self.output[self.filenames[self.current_index]])
+
+    def tabulate(self):
+        """
+        Export file metadata for use in a table.
+        """
+        if not self.image_paths:
+            QMessageBox.information(self, "No Files", "No image files to export metadata for.")
+            return [], []
+    
+        # Prepare column headers
+        headers = ["Filename", "Dimensions (Loaded)", "File Size (KB)"]
+    
+        # Prepare table data
+        table_data = []
+        for filename, path in self.image_paths.items():
+            dimensions = "N/A"  # Default if dimensions can't be determined
+            file_size = "N/A"   # Default if file size can't be determined
+    
+            # Determine dimensions
+            if isinstance(path, np.ndarray):
+                dimensions = str(path.shape)
+            else:
+                try:
+                    img = io.imread(path)
+                    dimensions = str(img.shape)
+                except Exception as e:
+                    self.logger.warning(f"Failed to load image for dimensions: {path}, Error: {e}")
+    
+            # Determine file size
+            if os.path.exists(path) and not isinstance(path, np.ndarray):
+                try:
+                    file_size = f"{os.path.getsize(path) / 1024:.2f} KB"
+                except Exception as e:
+                    self.logger.warning(f"Failed to get file size: {path}, Error: {e}")
+    
+            # Add row to table data
+            table_data.append([filename, dimensions, file_size])
+    
+        # Log data for debugging
+        self.logger.info(f"Headers: {headers}")
+        self.logger.info(f"Table Data: {table_data}")
+    
+        # Return data for integration with TableDialog
+        return headers, table_data
 
     def display_image(self, img):
         """Display the current image."""

@@ -10,10 +10,11 @@ import os
 import sys
 from dialogs.ImageViewer import ImageViewer
 import numpy as np
-
+from skimage.measure import regionprops, label
+import logging
 
 class CellposeAnalyzer(ImageViewer):
-    def __init__(self, image_paths=None, index=0, diameter=25):
+    def __init__(self, index=0, diameter=25, image_paths=None, logger = None):
         """
         Subclass of ImageViewer that integrates Cellpose analysis.
         """
@@ -21,8 +22,10 @@ class CellposeAnalyzer(ImageViewer):
         self.model = models.Cellpose(model_type='cyto3', gpu=True)
         self.output = {key: None for key in image_paths.keys()}
         self.title = 'CellposeAnalyzer'
+        self.masks = {}  # Store masks for each image
+
         # Initialize the parent class (ImageViewer)
-        super().__init__(image_paths=image_paths, index=index)
+        super().__init__(image_paths=image_paths, index=index, logger=logger)
 
     def read_image(self, image_path):
         """
@@ -45,10 +48,35 @@ class CellposeAnalyzer(ImageViewer):
         try:
             # Perform Cellpose evaluation
             masks, flows, styles, _ = self.model.eval(img, diameter=self.diameter, channels=[1, 2])
-            # Generate mask overlay
+            self.masks[self.filenames[self.current_index]] = masks  # Store masks for tabulation
             mask_RGB = plot.mask_overlay(img, masks)
             return mask_RGB
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Cellpose evaluation failed: {e}")
             return None
 
+    def tabulate(self):
+        """
+        Compute segmentation metrics for each object and return headers and data.
+        """
+        if not self.masks:
+            QMessageBox.warning(self, "No Masks", "No segmentation masks available for tabulation.")
+            return [], []
+    
+        headers = ["Filename", "Label", "Area", "Perimeter", "Major Axis Length", "Minor Axis Length", "Eccentricity"]
+        table_data = []
+    
+        for filename, masks in self.masks.items():
+            if masks is None:
+                continue
+            labeled_mask = label(masks)
+            properties = regionprops(labeled_mask)
+    
+            for prop in properties:
+                row = [
+                    filename, prop.label, prop.area, prop.perimeter,
+                    prop.major_axis_length, prop.minor_axis_length, prop.eccentricity
+                ]
+                table_data.append(row)
+    
+        return headers, table_data
