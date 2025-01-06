@@ -50,7 +50,6 @@ Clone the repository and install dependencies:
 ``` bash
 git clone https://github.com/username/mapel.git
 cd mapel
-pip install -r requirements.txt
 ```
 
 ### Running MAPEL
