@@ -12,7 +12,7 @@ Part 11 compliance governs the use of electronic records and signatures in regul
 
 MAPEL includes core functionalities that ensure adherence to 21 CFR Part 11 requirements: - **Comprehensive Audit Trails**: - Tracks all system and user actions. - Facilitates review and accountability for regulatory purposes.
 
-<img src=images/Screenshot%202025-01-05%20125434.png width="500 />
+<img src=https://github.com/jeffrey-plume/Mapel/images/Screenshot%202025-01-05%20125434.png width="500 />
 
 -   **Secure User Authentication and Access Control**:
     -   Password policies enforce a minimum of eight characters, including letters, digits, and special characters.
