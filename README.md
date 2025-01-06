@@ -12,7 +12,7 @@ Part 11 compliance governs the use of electronic records and signatures in regul
 
 MAPEL includes core functionalities that ensure adherence to 21 CFR Part 11 requirements: - **Comprehensive Audit Trails**: - Tracks all system and user actions. - Facilitates review and accountability for regulatory purposes.
 
-<img src=images/Screenshot%202025-01-05%20125434.png width="500"  />
+<img src=images/Screenshot%202025-01-05%20125434.png width="800"  />
 
 -   **Secure User Authentication and Access Control**:
     -   Password policies enforce a minimum of eight characters, including letters, digits, and special characters.
@@ -34,13 +34,6 @@ MAPEL includes core functionalities that ensure adherence to 21 CFR Part 11 requ
 MAPEL employs a modular architecture that simplifies compliance management: - Developers can create custom modules for specific tasks. - Each module must include: - `analyze()` for processing data. - `tabulate()` for summarizing results. - Missing functions default to displaying raw images or data. - Numeric `__init__` variables automatically generate dynamic controller windows, enabling users to adjust parameters in real-time.
 
 This modular approach enhances customization and reduces system-wide validation complexity, allowing updates to individual components without affecting overall compliance.
-
-------------------------------------------------------------------------
-
-### Open-Source Framework
-
--   Transparent and extensible codebase.
--   Encourages contributions and peer reviews from the developer community.
 
 ------------------------------------------------------------------------
 
@@ -76,23 +69,23 @@ The GUI provides tools for user authentication, audit trails, and more.
 
 ### System Architecture
 
-<img src=Icons/Mapel%20Workflow.png width="500"  />
+<img src=Icons/Mapel%20Workflow.png width="1000"  />
 
 ### Login Procedure
 
 -   On first launch, an admin username and password are generated automatically. Credentials are displayed in a pop-up window and logged in the session file. Changing default credentials after the initial login is recommended.
 
-<img src=images/Screenshot%202025-01-01%20135016.png width="300"  />
+<img src=images/Screenshot%202025-01-01%20135016.png width="500"  />
 
 -   For subsequent logins, users must provide their credentials.
 
-<img src=images/Screenshot%202025-01-05%20110632.png width="150"  />
+<img src=images/Screenshot%202025-01-05%20110632.png width="200"  />
 
 ### User Interface
 
 The UI is minimalistic, modeled after **ImageJ**, featuring a file menu and toolbar. Additional functionalities open in separate windows, allowing multiple tools to run simultaneously.
 
-<img src=images/Screenshot%202025-01-05%20111124.png width="300"  />
+<img src=images/Screenshot%202025-01-05%20111124.png width="400"  />
 
 #### Toolbar Functions
 
@@ -120,7 +113,7 @@ The UI is minimalistic, modeled after **ImageJ**, featuring a file menu and tool
 
 The **File Manager** provides a list of imported files and navigation controls for viewing individual images. It can be accessed via **Analyze \> File Manager**.
 
-<img src=images/Screenshot%202025-01-05%20113107.png width="225"  />
+<img src=images/Screenshot%202025-01-05%20113107.png width="200"  />
 
 ------------------------------------------------------------------------
 
@@ -167,11 +160,11 @@ Data is stored as compressed `.mapel` files containing raw data, analyzed result
 
 I integrated [Cellpose](https://github.com/MouseLand/cellpose) into a custom MAPEL module. Leveraging its robust cell segmentation capabilities, I applied its general-purpose algorithms to particle images from the [EMPS](https://github.com/by256/emps) dataset. This demonstrated the adaptability of Cellpose for segmenting diverse particle types, extending its typical use in cellular biology.
 
-<img src=images/Screen%20Recording%202025-01-05%20014816.gif)
+<img src=images/Screen%20Recording%202025-01-05%20014816.gif width="500"  />
 
 Output example:
 
-<img src=images/Screenshot%202025-01-05%20174910.png width="500"  />
+<img src=images/Screenshot%202025-01-05%20174910.png width="800"  />
 
 ------------------------------------------------------------------------
 
