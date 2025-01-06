@@ -12,7 +12,7 @@ Part 11 compliance governs the use of electronic records and signatures in regul
 
 MAPEL includes core functionalities that ensure adherence to 21 CFR Part 11 requirements: - **Comprehensive Audit Trails**: - Tracks all system and user actions. - Facilitates review and accountability for regulatory purposes.
 
-<img src=https://github.com/jeffrey-plume/Mapel/images/Screenshot%202025-01-05%20125434.png width="500 />
+<img src=images/Screenshot%202025-01-05%20125434.png width="500"  />
 
 -   **Secure User Authentication and Access Control**:
     -   Password policies enforce a minimum of eight characters, including letters, digits, and special characters.
@@ -76,43 +76,43 @@ The GUI provides tools for user authentication, audit trails, and more.
 
 ### System Architecture
 
-<img src=Mapel%20Workflow.png width="500 />
+<img src=images/Mapel%20Workflow.png width="500"  />
 
 ### Login Procedure
 
 -   On first launch, an admin username and password are generated automatically. Credentials are displayed in a pop-up window and logged in the session file. Changing default credentials after the initial login is recommended.
 
-<img src=images/Screenshot%202025-01-01%20135016.png width="300 />
+<img src=images/Screenshot%202025-01-01%20135016.png width="300"  />
 
 -   For subsequent logins, users must provide their credentials.
 
-<img src=images/Screenshot%202025-01-05%20110632.png width="150 />
+<img src=images/Screenshot%202025-01-05%20110632.png width="150"  />
 
 ### User Interface
 
 The UI is minimalistic, modeled after **ImageJ**, featuring a file menu and toolbar. Additional functionalities open in separate windows, allowing multiple tools to run simultaneously.
 
-<img src=images/Screenshot%202025-01-05%20111124.png width="300 />
+<img src=images/Screenshot%202025-01-05%20111124.png width="300"  />
 
 #### Toolbar Functions
 
--   <img src=Icons/new_file.png width="24 /> **Create File**: Create new .mapel file
+-   <img src=Icons/new_file.png width="24"  /> **Create File**: Create new .mapel file
 
--   <img src=Icons/open_file.png width="24 /> **Open**: Open previously saves .mapel file
+-   <img src=Icons/open_file.png width="24"  /> **Open**: Open previously saves .mapel file
 
--   <img src=Icons/save_file.png width="24 /> **Save**: Save current .mapel file
+-   <img src=Icons/save_file.png width="24"  /> **Save**: Save current .mapel file
 
--   <img src=Icons/import_file.png width="24 /> **Import**: Import raw data; currently only accepts image data.
+-   <img src=Icons/import_file.png width="24"  /> **Import**: Import raw data; currently only accepts image data.
 
--   <img src=Icons/tabular.png width="24 /> **View Results**: View table of results.
+-   <img src=Icons/tabular.png width="24"  /> **View Results**: View table of results.
 
--   <img src=Icons/imager.png width="24 /> **View Image**: View Image output.
+-   <img src=Icons/imager.png width="24"  /> **View Image**: View Image output.
 
--   <img src=Icons/run.png width="24 /> **Run All**: Run current analysis using current setting on all data.
+-   <img src=Icons/run.png width="24"  /> **Run All**: Run current analysis using current setting on all data.
 
--   <img src=Icons/audit_logo.png width="24 /> **View Audit Trail**: Audit trails are specific to each .mapel file or login session.
+-   <img src=Icons/audit_logo.png width="24"  /> **View Audit Trail**: Audit trails are specific to each .mapel file or login session.
 
--   <img src=Icons/signature_logo.png width="24 /> **Sign Data**: Sign results using private keys.
+-   <img src=Icons/signature_logo.png width="24"  /> **Sign Data**: Sign results using private keys.
 
 ------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ The UI is minimalistic, modeled after **ImageJ**, featuring a file menu and tool
 
 The **File Manager** provides a list of imported files and navigation controls for viewing individual images. It can be accessed via **Analyze \> File Manager**.
 
-<img src=images/Screenshot%202025-01-05%20113107.png width="225 />
+<img src=images/Screenshot%202025-01-05%20113107.png width="225"  />
 
 ------------------------------------------------------------------------
 
@@ -171,7 +171,7 @@ I integrated [Cellpose](https://github.com/MouseLand/cellpose) into a custom MAP
 
 Output example:
 
-<img src=images/Screenshot%202025-01-05%20174910.png width="500 />
+<img src=images/Screenshot%202025-01-05%20174910.png width="500"  />
 
 ------------------------------------------------------------------------
 
