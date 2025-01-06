@@ -12,7 +12,7 @@ Part 11 compliance governs the use of electronic records and signatures in regul
 
 MAPEL includes core functionalities that ensure adherence to 21 CFR Part 11 requirements: - **Comprehensive Audit Trails**: - Tracks all system and user actions. - Facilitates review and accountability for regulatory purposes.
 
-![](images/Screenshot%202025-01-05%20125434.png){width="500"}
+<img src=images/Screenshot%202025-01-05%20125434.png width="500 />
 
 -   **Secure User Authentication and Access Control**:
     -   Password policies enforce a minimum of eight characters, including letters, digits, and special characters.
@@ -76,43 +76,43 @@ The GUI provides tools for user authentication, audit trails, and more.
 
 ### System Architecture
 
-![](Mapel%20Workflow.png){width="500"}
+<img src=Mapel%20Workflow.png width="500 />
 
 ### Login Procedure
 
 -   On first launch, an admin username and password are generated automatically. Credentials are displayed in a pop-up window and logged in the session file. Changing default credentials after the initial login is recommended.
 
-![](images/Screenshot%202025-01-01%20135016.png){width="300"}
+<img src=images/Screenshot%202025-01-01%20135016.png width="300 />
 
 -   For subsequent logins, users must provide their credentials.
 
-![](images/Screenshot%202025-01-05%20110632.png){width="150"}
+<img src=images/Screenshot%202025-01-05%20110632.png width="150 />
 
 ### User Interface
 
 The UI is minimalistic, modeled after **ImageJ**, featuring a file menu and toolbar. Additional functionalities open in separate windows, allowing multiple tools to run simultaneously.
 
-![](images/Screenshot%202025-01-05%20111124.png){width="300"}
+<img src=images/Screenshot%202025-01-05%20111124.png width="300 />
 
 #### Toolbar Functions
 
--   ![](Icons/new_file.png){width="24"} **Create File**: Create new .mapel file
+-   <img src=Icons/new_file.png width="24 /> **Create File**: Create new .mapel file
 
--   ![](Icons/open_file.png){width="24"} **Open**: Open previously saves .mapel file
+-   <img src=Icons/open_file.png width="24 /> **Open**: Open previously saves .mapel file
 
--   ![](Icons/save_file.png){width="24"} **Save**: Save current .mapel file
+-   <img src=Icons/save_file.png width="24 /> **Save**: Save current .mapel file
 
--   ![](Icons/import_file.png){width="24"} **Import**: Import raw data; currently only accepts image data.
+-   <img src=Icons/import_file.png width="24 /> **Import**: Import raw data; currently only accepts image data.
 
--   ![](Icons/tabular.png){width="24"} **View Results**: View table of results.
+-   <img src=Icons/tabular.png width="24 /> **View Results**: View table of results.
 
--   ![](Icons/imager.png){width="24"} **View Image**: View Image output.
+-   <img src=Icons/imager.png width="24 /> **View Image**: View Image output.
 
--   ![](Icons/run.png){width="24"} **Run All**: Run current analysis using current setting on all data.
+-   <img src=Icons/run.png width="24 /> **Run All**: Run current analysis using current setting on all data.
 
--   ![](Icons/audit_logo.png){width="24"} **View Audit Trail**: Audit trails are specific to each .mapel file or login session.
+-   <img src=Icons/audit_logo.png width="24 /> **View Audit Trail**: Audit trails are specific to each .mapel file or login session.
 
--   ![](Icons/signature_logo.png){width="24"} **Sign Data**: Sign results using private keys.
+-   <img src=Icons/signature_logo.png width="24 /> **Sign Data**: Sign results using private keys.
 
 ------------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ The UI is minimalistic, modeled after **ImageJ**, featuring a file menu and tool
 
 The **File Manager** provides a list of imported files and navigation controls for viewing individual images. It can be accessed via **Analyze \> File Manager**.
 
-![](images/Screenshot%202025-01-05%20113107.png){width="225"}
+<img src=images/Screenshot%202025-01-05%20113107.png width="225 />
 
 ------------------------------------------------------------------------
 
@@ -167,11 +167,11 @@ Data is stored as compressed `.mapel` files containing raw data, analyzed result
 
 I integrated [Cellpose](https://github.com/MouseLand/cellpose) into a custom MAPEL module. Leveraging its robust cell segmentation capabilities, I applied its general-purpose algorithms to particle images from the [EMPS](https://github.com/by256/emps) dataset. This demonstrated the adaptability of Cellpose for segmenting diverse particle types, extending its typical use in cellular biology.
 
-![](images/Screen%20Recording%202025-01-05%20014816.gif)
+<img src=images/Screen%20Recording%202025-01-05%20014816.gif)
 
 Output example:
 
-![](images/Screenshot%202025-01-05%20174910.png){width="500"}
+<img src=images/Screenshot%202025-01-05%20174910.png width="500 />
 
 ------------------------------------------------------------------------
 
