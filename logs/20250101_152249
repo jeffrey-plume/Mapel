@@ -1,8 +1,0 @@
-{"timestamp": "2025-01-01 15:22:57", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
-{"timestamp": "2025-01-01 15:22:57", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
-{"timestamp": "2025-01-01 15:22:57", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
-{"timestamp": "2025-01-01 15:22:57", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
-{"timestamp": "2025-01-01 15:22:59", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "[AUDIT] 2025-01-01 15:22:59.736412 - User: jmp637, Action: Login failed for user 'jmp637'"}
-{"timestamp": "2025-01-01 15:23:08", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
-{"timestamp": "2025-01-01 15:23:15", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
-{"timestamp": "2025-01-01 15:23:15", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}

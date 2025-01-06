@@ -1,6 +1,0 @@
-{"timestamp": "2025-01-05 13:56:24", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
-{"timestamp": "2025-01-05 13:56:24", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
-{"timestamp": "2025-01-05 13:56:24", "username": "System", "logger_name": "__main__", "log_level": "WARNING", "message": "User 'None' does not exist."}
-{"timestamp": "2025-01-05 13:56:24", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "User 'Admin_HGN7WB' registered successfully."}
-{"timestamp": "2025-01-05 13:56:24", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Temporary default admin credentials created: Username=Admin_HGN7WB, Password=t?!=im<y~\"P/7b?B"}
-{"timestamp": "2025-01-05 13:56:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}

@@ -1,8 +1,0 @@
-{"timestamp": "2025-01-03 19:33:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
-{"timestamp": "2025-01-03 19:33:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
-{"timestamp": "2025-01-03 19:33:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
-{"timestamp": "2025-01-03 19:33:11", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
-{"timestamp": "2025-01-03 19:33:16", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
-{"timestamp": "2025-01-03 19:33:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "File list initialized with 14 files."}
-{"timestamp": "2025-01-03 19:33:24", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "FileManagementDialog opened with 14 files."}
-{"timestamp": "2025-01-03 19:34:03", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "Error decrypting private key for 'jmp637': Invalid padding bytes."}

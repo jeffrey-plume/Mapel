@@ -1,8 +1,0 @@
-{"timestamp": "2025-01-01 15:30:48", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
-{"timestamp": "2025-01-01 15:30:48", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
-{"timestamp": "2025-01-01 15:30:48", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
-{"timestamp": "2025-01-01 15:30:48", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
-{"timestamp": "2025-01-01 15:30:53", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "User jmp637 logged in."}
-{"timestamp": "2025-01-01 15:30:53", "username": "jmp637", "logger_name": "__main__", "log_level": "ERROR", "message": "An unexpected error occurred: super-class __init__() of type ModuleManager was never called"}
-{"timestamp": "2025-01-01 15:30:53", "username": "jmp637", "logger_name": "__main__", "log_level": "DEBUG", "message": "Traceback (most recent call last):\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Shiva\\main.py\", line 63, in main\n    main_window = MainWindow(user_model, logger=logger)\n  File \"C:\\Users\\Lenovo\\OneDrive\\Documents\\GitHub\\Shiva\\ui\\main_window.py\", line 75, in __init__\n    self.module_manager.module_selected.connect(self.update_selection)\nRuntimeError: super-class __init__() of type ModuleManager was never called\n"}
-{"timestamp": "2025-01-01 15:30:58", "username": "jmp637", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}

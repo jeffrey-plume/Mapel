@@ -1,8 +1,0 @@
-{"timestamp": "2025-01-03 19:48:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Starting the application."}
-{"timestamp": "2025-01-03 19:48:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Table 'users' initialized successfully."}
-{"timestamp": "2025-01-03 19:48:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Admin user already exists."}
-{"timestamp": "2025-01-03 19:48:05", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Services initialized successfully."}
-{"timestamp": "2025-01-03 19:48:10", "username": "System", "logger_name": "__main__", "log_level": "WARNING", "message": "User 'jmp637$' does not exist."}
-{"timestamp": "2025-01-03 19:48:10", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "[AUDIT] 2025-01-03 19:48:10.764857 - User: jmp637$, Action: Login failed for user 'jmp637$'"}
-{"timestamp": "2025-01-03 19:48:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Login canceled by user."}
-{"timestamp": "2025-01-03 19:48:30", "username": "System", "logger_name": "__main__", "log_level": "INFO", "message": "Database connection closed."}
