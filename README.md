@@ -76,7 +76,7 @@ The GUI provides tools for user authentication, audit trails, and more.
 
 ### System Architecture
 
-<img src=images/Mapel%20Workflow.png width="500"  />
+<img src=Icons/Mapel%20Workflow.png width="500"  />
 
 ### Login Procedure
 
